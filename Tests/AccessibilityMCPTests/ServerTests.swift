@@ -13,9 +13,13 @@ struct ServerTests {
         #expect(AccessibilityServer.version == "0.1.0")
     }
 
-    @Test("Server returns empty tool list")
-    func serverReturnsEmptyToolList() {
+    @Test("Server returns four tools")
+    func serverReturnsFourTools() {
         let tools = AccessibilityServer.tools()
-        #expect(tools.isEmpty)
+        #expect(tools.count == 4)
+        #expect(tools.map { $0.name }.contains("get_ui_tree"))
+        #expect(tools.map { $0.name }.contains("find_element"))
+        #expect(tools.map { $0.name }.contains("get_focused_element"))
+        #expect(tools.map { $0.name }.contains("list_windows"))
     }
 }

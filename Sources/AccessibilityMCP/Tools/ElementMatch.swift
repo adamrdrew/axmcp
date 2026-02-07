@@ -1,0 +1,15 @@
+import Foundation
+
+struct ElementMatch: Codable, Sendable {
+    let role: String
+    let title: String?
+    let value: String?
+    let path: String
+
+    init(role: String, title: String?, value: String?, path: String) {
+        self.role = role
+        self.title = title
+        self.value = value
+        self.path = path
+    }
+}

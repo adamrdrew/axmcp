@@ -1,0 +1,130 @@
+phase:
+  id: "0004"
+  slug: read-only-tools
+  title: Read-Only MCP Tools
+  status: complete
+
+steps:
+  - id: S001
+    title: App Resolution Service
+    implemented: true
+    reviewed: true
+    notes: "Protocol, LiveAppResolver, and MockAppResolver implemented. Tests verify PID pass-through, app name resolution, and error cases (not running, multiple matches, invalid identifiers)."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/AppResolver.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/AppResolutionError.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/LiveAppResolver.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/Mocks/MockAppResolver.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/Tools/AppResolverTests.swift
+
+  - id: S002
+    title: Tool Parameter Structs
+    implemented: true
+    reviewed: true
+    notes: "All four parameter structs implemented with Codable conformance and validation. Tests verify JSON encoding/decoding and validation logic for depth and maxResults constraints."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/GetUITreeParameters.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/FindElementParameters.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/GetFocusedElementParameters.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/ListWindowsParameters.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/ToolParameterError.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/Tools/ToolParameterTests.swift
+
+  - id: S003
+    title: Tool Response Structs
+    implemented: true
+    reviewed: true
+    notes: "All response types implemented (UITreeResponse, FindElementResponse, FocusedElementResponse, ListWindowsResponse, ToolError) with full Codable conformance. Tests verify JSON serialization for all response types."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/UITreeResponse.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/FindElementResponse.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/FocusedElementResponse.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/ListWindowsResponse.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/ElementMatch.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/ElementInfo.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/WindowInfo.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/ToolError.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/Tools/ToolResponseTests.swift
+
+  - id: S004
+    title: get_ui_tree Tool Handler
+    implemented: true
+    reviewed: true
+    notes: "Handler resolves app, creates TreeTraversalOptions from parameters, executes traversal, and returns UITreeResponse. Tests verify success path, error handling (app not found, permissions denied, invalid parameters), and PID resolution."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/GetUITreeHandler.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/ToolExecutionError.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/Tools/GetUITreeHandlerTests.swift
+
+  - id: S005
+    title: find_element Tool Handler
+    implemented: true
+    reviewed: true
+    notes: "Handler resolves app, creates SearchCriteria from parameters, calls ElementFinder, and returns FindElementResponse with hasMoreResults flag. Tests verify element search, result limiting, empty results, and error handling."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/FindElementHandler.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/Tools/FindElementHandlerTests.swift
+
+  - id: S006
+    title: get_focused_element Tool Handler
+    implemented: true
+    reviewed: true
+    notes: "Handler queries focused element either system-wide or app-specific. Returns FocusedElementResponse with hasFocus flag and optional element info. Tests verify both modes and no-focus state."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/GetFocusedElementHandler.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/Tools/GetFocusedElementHandlerTests.swift
+
+  - id: S007
+    title: list_windows Tool Handler
+    implemented: true
+    reviewed: true
+    notes: "Handler lists windows either app-specific or system-wide using windows attribute. Respects includeMinimized parameter for filtering. Tests verify both modes and filtering behavior."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/ListWindowsHandler.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/Tools/ListWindowsHandlerTests.swift
+
+  - id: S008
+    title: MCP Tool Schema Definitions
+    implemented: true
+    reviewed: true
+    notes: "All four tool schemas defined in AccessibilityServer.tools(). Schemas specify parameters using MCP Value type with proper type and description metadata."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/AccessibilityServer.swift
+
+  - id: S009
+    title: Wire Tools to MCP Server
+    implemented: true
+    reviewed: true
+    notes: "CallTool handler registered that decodes parameters, instantiates handlers with dependencies, executes tools, and returns JSON responses. All four tools wired and tested."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/AccessibilityServer.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/ServerTests.swift
+
+  - id: S010
+    title: Integration Tests
+    implemented: true
+    reviewed: true
+    notes: "Integration tests verify handlers work with MockAXBridge, produce valid JSON, and return structured errors. All individual handler tests also serve as integration tests with mocked dependencies."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/Tools/ToolIntegrationTests.swift
+
+  - id: S011
+    title: Update README with Tool Documentation
+    implemented: true
+    reviewed: true
+    notes: "README updated with comprehensive tool documentation including parameters, return values, examples, error handling, accessibility permissions setup, and current limitations."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/README.md
+
+  - id: S012
+    title: Extract Error Conversion Utility
+    implemented: true
+    reviewed: true
+    notes: "Created ErrorConverter utility with static methods for converting AppResolutionError, ToolParameterError, AccessibilityError, and TreeTraversalError to ToolExecutionError. Created WindowInfoConverter to extract window conversion logic from ListWindowsHandler. Updated all four handlers (GetUITreeHandler, FindElementHandler, GetFocusedElementHandler, ListWindowsHandler) to use ErrorConverter. All handlers now under 100 lines (excluding blanks/comments): GetUITreeHandler 89 lines, FindElementHandler 99 lines, GetFocusedElementHandler 87 lines, ListWindowsHandler 76 lines. All 126 tests pass with zero regressions. Build succeeds with zero warnings."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/ErrorConverter.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/WindowInfoConverter.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/GetUITreeHandler.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/FindElementHandler.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/GetFocusedElementHandler.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/Tools/ListWindowsHandler.swift
