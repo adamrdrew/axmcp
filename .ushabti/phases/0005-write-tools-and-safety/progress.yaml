@@ -1,0 +1,115 @@
+phase:
+  id: "0005"
+  slug: write-tools-and-safety
+  title: Write Tools & Safety
+  status: complete
+
+steps:
+  - id: S001
+    title: ServerConfiguration and Read-Only Mode
+    implemented: true
+    reviewed: true
+    notes: "Created ServerConfiguration struct with environment and CLI parsing. Tests pass."
+    touched:
+      - Sources/AccessibilityMCP/Security/ServerConfiguration.swift
+      - Tests/AccessibilityMCPTests/ServerConfigurationTests.swift
+
+  - id: S002
+    title: ApplicationBlocklist
+    implemented: true
+    reviewed: true
+    notes: "Created ApplicationBlocklist actor with default blocklist and bundle ID resolution. All tests pass."
+    touched:
+      - Sources/AccessibilityMCP/Security/ApplicationBlocklist.swift
+      - Sources/AccessibilityMCP/Security/BlocklistError.swift
+      - Tests/AccessibilityMCPTests/ApplicationBlocklistTests.swift
+
+  - id: S003
+    title: RateLimiter
+    implemented: true
+    reviewed: true
+    notes: "Created RateLimiter actor with sliding window rate limiting and delay-based throttling. All tests pass."
+    touched:
+      - Sources/AccessibilityMCP/Security/RateLimiter.swift
+      - Sources/AccessibilityMCP/Security/RateLimitResult.swift
+      - Tests/AccessibilityMCPTests/RateLimiterTests.swift
+
+  - id: S004
+    title: Write Tool Parameter and Response Structs
+    implemented: true
+    reviewed: true
+    notes: "Created parameter and response structs for write tools with validation and AnyCodableValue for type coercion. All tests pass."
+    touched:
+      - Sources/AccessibilityMCP/Actions/AnyCodableValue.swift
+      - Sources/AccessibilityMCP/Actions/ElementStateInfo.swift
+      - Sources/AccessibilityMCP/Actions/PerformActionParameters.swift
+      - Sources/AccessibilityMCP/Actions/SetValueParameters.swift
+      - Sources/AccessibilityMCP/Actions/ActionResponse.swift
+      - Sources/AccessibilityMCP/Actions/SetValueResponse.swift
+      - Tests/AccessibilityMCPTests/WriteToolParametersTests.swift
+
+  - id: S005
+    title: Post-Action State Reader
+    implemented: true
+    reviewed: true
+    notes: "Created ElementStateReader for capturing element state after actions. Gracefully handles missing attributes. All tests pass."
+    touched:
+      - Sources/AccessibilityMCP/Actions/ElementStateReader.swift
+      - Tests/AccessibilityMCPTests/ElementStateReaderTests.swift
+
+  - id: S006
+    title: PerformActionHandler
+    implemented: true
+    reviewed: true
+    notes: "Created PerformActionHandler with all safety checks (read-only, blocklist, rate limit). Returns post-action state. All tests pass."
+    touched:
+      - Sources/AccessibilityMCP/Tools/PerformActionHandler.swift
+      - Sources/AccessibilityMCP/Tools/PerformActionHandler+ErrorConversion.swift
+      - Tests/AccessibilityMCPTests/PerformActionHandlerTests.swift
+
+  - id: S007
+    title: SetValueHandler
+    implemented: true
+    reviewed: true
+    notes: "Created SetValueHandler with value type coercion and all safety checks. Returns previous and new values plus post-change state. All tests pass."
+    touched:
+      - Sources/AccessibilityMCP/Tools/SetValueHandler.swift
+      - Sources/AccessibilityMCP/Tools/SetValueHandler+ErrorConversion.swift
+      - Tests/AccessibilityMCPTests/SetValueHandlerTests.swift
+
+  - id: S008
+    title: Wire Write Tools to MCP Server
+    implemented: true
+    reviewed: true
+    notes: "Integrated write tools into MCP server with ServerContext for actor-isolated safety dependencies. Tools conditionally included based on read-only mode. All tests pass."
+    touched:
+      - Sources/AccessibilityMCP/ServerContext.swift
+      - Sources/AccessibilityMCP/AccessibilityServer.swift
+      - Sources/AccessibilityMCP/AccessibilityServer+WriteTools.swift
+      - Sources/AccessibilityMCP/main.swift
+      - Tests/AccessibilityMCPTests/ServerTests.swift
+
+  - id: S009
+    title: ErrorConverter Updates for Write Operations
+    implemented: true
+    reviewed: true
+    notes: "Extended ErrorConverter with write-operation error handlers. All conversions include operation, errorType, message, app, and guidance. All tests pass."
+    touched:
+      - Sources/AccessibilityMCP/Tools/ErrorConverter+WriteOperations.swift
+      - Tests/AccessibilityMCPTests/ErrorConverterWriteOpsTests.swift
+
+  - id: S010
+    title: Integration Tests for Write Tools
+    implemented: true
+    reviewed: true
+    notes: "Created comprehensive integration tests covering end-to-end flows, safety integration, error propagation, and post-action state verification. All tests pass with MockAXBridge."
+    touched:
+      - Tests/AccessibilityMCPTests/WriteToolsIntegrationTests.swift
+
+  - id: S011
+    title: Update README with Write Tool Documentation
+    implemented: true
+    reviewed: true
+    notes: "Updated README with comprehensive documentation for perform_action and set_value, safety features (read-only mode, blocklist, rate limiting), configuration reference, and agency loop examples."
+    touched:
+      - README.md

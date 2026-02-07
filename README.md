@@ -4,7 +4,7 @@ A macOS MCP server written in Swift that exposes the macOS Accessibility (AX) AP
 
 ## Status
 
-This project is in active development. The current version (0.1.0) provides read-only access to macOS Accessibility trees with four MCP tools for UI inspection.
+This project is in active development. The current version (0.1.0) provides both read and write access to macOS Accessibility trees with six MCP tools: four for UI inspection and two for UI automation. Write operations are protected by read-only mode, application blocklist, and rate limiting.
 
 ## Requirements
 
@@ -33,6 +33,18 @@ Or use the compiled binary:
 .build/debug/accessibility-mcp
 ```
 
+**Run in read-only mode** (disables write operations):
+
+```bash
+swift run accessibility-mcp --read-only
+```
+
+Or using environment variable:
+
+```bash
+ACCESSIBILITY_MCP_READ_ONLY=1 swift run accessibility-mcp
+```
+
 ## Testing
 
 Run the test suite:
@@ -58,7 +70,9 @@ Without these permissions, the server will return permission denied errors.
 
 ## MCP Tools
 
-The server provides four read-only tools for inspecting application UI:
+The server provides six MCP tools: four read-only tools for inspecting application UI and two write tools for UI automation.
+
+### Read-Only Tools
 
 ### get_ui_tree
 
@@ -172,6 +186,207 @@ List all windows for an application or system-wide.
 }
 ```
 
+### Write Tools
+
+Write tools are disabled when running in read-only mode (`--read-only` flag or `ACCESSIBILITY_MCP_READ_ONLY=1` env var).
+
+### perform_action
+
+Perform an accessibility action on a UI element (press button, select menu, etc.).
+
+**Parameters:**
+- `app` (required): Application name or PID
+- `elementPath` (required): Element path from find_element or get_ui_tree (e.g., "app(1234)/window[0]/button[@title='OK']")
+- `action` (required): Action name. Supported actions:
+  - `AXPress` - Press a button or activate an element
+  - `AXPick` - Pick/select an item (menus, lists)
+  - `AXShowMenu` - Show a context menu
+  - `AXConfirm` - Confirm a dialog
+  - `AXCancel` - Cancel a dialog
+  - `AXRaise` - Bring a window to front
+  - `AXIncrement` - Increment a value (stepper, slider)
+  - `AXDecrement` - Decrement a value (stepper, slider)
+
+**Returns:** JSON object with:
+- `success`: Boolean indicating success
+- `action`: The action that was performed
+- `elementState`: Post-action element state (role, title, value, enabled, focused, actions, path)
+- `rateLimitWarning`: Optional warning if rate limit was applied
+
+**Example:**
+```json
+{
+  "app": "Finder",
+  "elementPath": "app(1234)/window[0]/button[@title='Close']",
+  "action": "AXPress"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "action": "AXPress",
+  "elementState": {
+    "role": "AXButton",
+    "title": "Close",
+    "value": null,
+    "enabled": true,
+    "focused": false,
+    "actions": ["AXPress"],
+    "path": "app(1234)/window[0]/button[@title='Close']"
+  },
+  "rateLimitWarning": null
+}
+```
+
+**Safety checks:**
+- Blocked in read-only mode
+- Blocked for applications on blocklist (Terminal, iTerm2, System Settings, Keychain Access by default)
+- Rate limited (default: 10 actions/second)
+- Returns post-action state for verification
+
+### set_value
+
+Set the value of a UI element (text field, checkbox, slider, etc.).
+
+**Parameters:**
+- `app` (required): Application name or PID
+- `elementPath` (required): Element path from find_element or get_ui_tree
+- `value` (required): Value to set. Type depends on element:
+  - String for text fields
+  - Boolean (true/false) for checkboxes
+  - Number for sliders, steppers, number fields
+
+**Returns:** JSON object with:
+- `success`: Boolean indicating success
+- `previousValue`: The value before the change (string or null)
+- `newValue`: The value after the change (string or null)
+- `elementState`: Post-change element state
+- `rateLimitWarning`: Optional warning if rate limit was applied
+
+**Example (text field):**
+```json
+{
+  "app": "TextEdit",
+  "elementPath": "app(1234)/window[0]/textfield[0]",
+  "value": "Hello, world!"
+}
+```
+
+**Example (checkbox):**
+```json
+{
+  "app": "Safari",
+  "elementPath": "app(5678)/window[0]/checkbox[@title='Enable JavaScript']",
+  "value": true
+}
+```
+
+**Example (slider):**
+```json
+{
+  "app": "Music",
+  "elementPath": "app(9012)/window[0]/slider[@title='Volume']",
+  "value": 75
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "previousValue": "Hello",
+  "newValue": "Hello, world!",
+  "elementState": {
+    "role": "AXTextField",
+    "title": null,
+    "value": "Hello, world!",
+    "enabled": true,
+    "focused": true,
+    "actions": [],
+    "path": "app(1234)/window[0]/textfield[0]"
+  },
+  "rateLimitWarning": null
+}
+```
+
+**Safety checks:**
+- Blocked in read-only mode
+- Blocked for applications on blocklist
+- Rate limited (default: 10 actions/second)
+- Automatic value type coercion based on JSON type
+- Returns previous and new values for verification
+
+## Safety Features
+
+### Read-Only Mode
+
+Disable all write operations while preserving read access. Useful for safe exploration or when automation is not needed.
+
+**Enable via CLI flag:**
+```bash
+swift run accessibility-mcp --read-only
+```
+
+**Enable via environment variable:**
+```bash
+ACCESSIBILITY_MCP_READ_ONLY=1 swift run accessibility-mcp
+```
+
+When enabled:
+- `perform_action` and `set_value` are hidden from the tool list
+- Attempting to call write tools returns a structured error with guidance
+- All read-only tools continue to work normally
+
+### Application Blocklist
+
+Prevent write operations on security-sensitive applications. Read operations are always permitted.
+
+**Default blocklist:**
+- Keychain Access (`com.apple.keychainaccess`)
+- Terminal (`com.apple.Terminal`)
+- iTerm2 (`com.googlecode.iterm2`)
+- System Settings (`com.apple.systempreferences`)
+
+**Add custom apps to blocklist:**
+```bash
+ACCESSIBILITY_MCP_BLOCKLIST="com.example.app1,com.example.app2" swift run accessibility-mcp
+```
+
+Custom apps are merged with the default blocklist. Use bundle identifiers, not app names.
+
+When a blocklisted app is targeted:
+- Write operations return a structured error: "Application 'X' is blocklisted for write operations"
+- Read operations continue to work
+- Error includes guidance directing users to the configuration
+
+### Rate Limiting
+
+Prevent runaway automation loops by limiting write operations per second.
+
+**Default:** 10 actions per second
+
+**Configure custom limit:**
+```bash
+ACCESSIBILITY_MCP_RATE_LIMIT=5 swift run accessibility-mcp
+```
+
+When rate limit is exceeded:
+- The operation is **delayed** (not rejected)
+- A warning is included in the response: "Rate limit reached. Delayed 0.123s"
+- This allows controlled bursts while preventing infinite loops
+
+## Configuration Reference
+
+| Environment Variable | CLI Flag | Default | Description |
+|---------------------|----------|---------|-------------|
+| `ACCESSIBILITY_MCP_READ_ONLY` | `--read-only` | `false` | Disable write operations |
+| `ACCESSIBILITY_MCP_RATE_LIMIT` | - | `10` | Max write operations per second |
+| `ACCESSIBILITY_MCP_BLOCKLIST` | - | (see below) | Comma-separated bundle IDs to block |
+
+**Default blocklist:** `com.apple.keychainaccess,com.apple.Terminal,com.googlecode.iterm2,com.apple.systempreferences`
+
 ## Error Handling
 
 All tools return structured errors with:
@@ -186,23 +401,33 @@ All tools return structured errors with:
 - **permission_denied**: Accessibility permissions not granted. See "Accessibility Permissions" section above.
 - **timeout**: Operation exceeded time limit. Try reducing depth or narrowing search criteria.
 - **invalid_parameter**: A parameter value is invalid (e.g., negative depth, zero maxResults).
+- **read_only_mode**: Write operation attempted in read-only mode. Remove `--read-only` flag or `ACCESSIBILITY_MCP_READ_ONLY` env var.
+- **blocklisted_application**: Write operation attempted on blocklisted app. Read operations are still permitted.
+- **action_not_supported**: The requested action is not supported by the target element. Use `get_ui_tree` or `find_element` to check available actions.
+- **element_path_error**: Element path is invalid or element not found. Check path syntax and ensure element exists.
 
 ## Limitations
 
 Current limitations (to be addressed in future phases):
-- Read-only access (no actions, no value setting)
 - No element observation or change notifications
 - Window position/size/minimized/frontmost detection is placeholder (returns default values)
-- No application blocklist yet (will be added with write operations)
-- No rate limiting (not needed for read-only operations)
+- No interactive confirmation dialogs (MCP protocol limitation)
+- Write operations cannot be undone - use with caution
 
-## Safety
+## Important Notes on Write Operations
 
-This version provides read-only access only. Future versions will add:
-- Write operations with destructive action warnings
-- Read-only mode flag to disable all mutations
-- Application blocklist for security-sensitive apps
-- Rate limiting for action execution
+**Actions have real side effects.** `perform_action` and `set_value` modify application state just like user interaction. This includes:
+- Closing windows and dialogs
+- Deleting or modifying content
+- Executing commands
+- Changing settings
+
+**Always verify intent before automating actions.** Use the agency loop:
+1. Find the element with `find_element` or `get_ui_tree`
+2. Perform the action with `perform_action` or `set_value`
+3. Verify the outcome using the returned `elementState`
+
+**Use read-only mode for safe exploration.** When you only need to inspect UI, not modify it, enable read-only mode to prevent accidental changes.
 
 ## Development
 
