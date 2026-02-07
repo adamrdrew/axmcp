@@ -9,6 +9,8 @@ struct MockAXBridge: AXBridge, @unchecked Sendable {
     var mockAttributeNames: [ElementAttribute] = []
     var shouldThrowPermissionDenied = false
     var shouldThrowInvalidElement = false
+    var simulateSlowOperations = false
+    var operationDelay: TimeInterval = 0.0
 
     func createApplicationElement(
         pid: pid_t
@@ -27,6 +29,7 @@ struct MockAXBridge: AXBridge, @unchecked Sendable {
         _ attribute: ElementAttribute,
         from element: UIElement
     ) throws(AccessibilityError) -> T {
+        simulateDelay()
         try checkPermissions()
         try checkElement()
         guard let value = mockAttributes[attribute] else {
@@ -84,6 +87,7 @@ struct MockAXBridge: AXBridge, @unchecked Sendable {
     func getChildren(
         from element: UIElement
     ) throws(AccessibilityError) -> [UIElement] {
+        simulateDelay()
         try checkPermissions()
         try checkElement()
         return mockChildren
@@ -105,8 +109,15 @@ struct MockAXBridge: AXBridge, @unchecked Sendable {
         }
     }
 
-    private func createMockElement() -> UIElement {
+    func createMockElement() -> UIElement {
         UIElement(AXUIElementCreateSystemWide())
+    }
+
+    private func simulateDelay() {
+        guard simulateSlowOperations && operationDelay > 0 else {
+            return
+        }
+        Thread.sleep(forTimeInterval: operationDelay)
     }
 }
 

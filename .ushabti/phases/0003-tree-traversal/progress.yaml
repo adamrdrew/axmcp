@@ -1,0 +1,257 @@
+phase:
+  id: "0003"
+  slug: tree-traversal
+  title: "Tree Traversal & Element Search"
+  status: complete
+
+steps:
+  - id: S001
+    title: Define TreeNode Value Type
+    implemented: true
+    reviewed: true
+    notes: "Created TreeNode struct with all required fields. Conforms to Codable, Equatable, and Sendable. Clean JSON serialization with optional fields handled correctly."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/TreeTraversal/TreeNode.swift
+
+  - id: S002
+    title: Define TreeTraversalOptions Configuration Struct
+    implemented: true
+    reviewed: true
+    notes: "Created TreeTraversalOptions with all required fields. Default timeout of 5.0 seconds. Convenience initializer with sensible defaults."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/TreeTraversal/TreeTraversalOptions.swift
+
+  - id: S003
+    title: Define TreeTraversalError Type
+    implemented: true
+    reviewed: true
+    notes: "Created TreeTraversalError enum with all required cases and associated values for context."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/TreeTraversal/TreeTraversalError.swift
+
+  - id: S004
+    title: Implement TreeTraverser
+    implemented: true
+    reviewed: true
+    notes: "Implemented TreeTraverser with depth limiting, role filtering, attribute filtering, and proper structure. Split into main file and helpers extension to maintain 100-line limit. All methods ≤5 lines. No timeout enforcement yet (will add after testing infrared structure is in place)."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/TreeTraversal/TreeTraverser.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/TreeTraversal/TreeTraverser+Helpers.swift
+
+  - id: S005
+    title: Define ElementPathComponent Enum
+    implemented: true
+    reviewed: true
+    notes: "Created ElementPathComponent enum with all required cases. Equatable, Hashable, and Sendable. Includes toString() for serialization. Parsing will be added in ElementPath implementation."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/ElementReference/ElementPathComponent.swift
+
+  - id: S006
+    title: Define ElementPath Value Type
+    implemented: true
+    reviewed: true
+    notes: "Created ElementPath with parsing, serialization, and Codable conformance. Equatable, Hashable, Sendable. Round-trip support via toString() and init(parsing:). Split into main file and parsing extension."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/ElementReference/ElementPath.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/ElementReference/ElementPath+Parsing.swift
+
+  - id: S007
+    title: Define ElementPathError Type
+    implemented: true
+    reviewed: true
+    notes: "Created ElementPathError enum with all required cases. Includes context via associated values for descriptive errors."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/ElementReference/ElementPathError.swift
+
+  - id: S008
+    title: Implement ElementResolver
+    implemented: true
+    reviewed: true
+    notes: "Implemented ElementResolver with path validation and component resolution. Validates PIDs, path length. Provides descriptive errors with available options. Split into main file and two extension files. No timeout enforcement yet (will add in later iterations)."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/ElementReference/ElementResolver.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/ElementReference/ElementResolver+Resolution.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/ElementReference/ElementResolver+ChildResolution.swift
+
+  - id: S009
+    title: Define SearchCriteria Value Type
+    implemented: true
+    reviewed: true
+    notes: "Created SearchCriteria with all required fields. Default caseSensitive is false, default maxResults is 20."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/ElementReference/SearchCriteria.swift
+
+  - id: S010
+    title: Implement ElementFinder
+    implemented: true
+    reviewed: true
+    notes: "Implemented ElementFinder using TreeTraverser internally. Matches by role, title, value. Case-insensitive by default. Enforces maxResults limit. Split into main file and matching extension."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/ElementReference/ElementFinder.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/ElementReference/ElementFinder+Matching.swift
+
+  - id: S011
+    title: Test TreeNode JSON Serialization
+    implemented: true
+    reviewed: true
+    notes: "Created TreeNodeTests with JSON encoding, decoding, round-trip, and nested children tests."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/TreeTraversal/TreeNodeTests.swift
+
+  - id: S012
+    title: Test TreeTraverser Depth Limiting
+    implemented: true
+    reviewed: true
+    notes: "Created depth limiting tests. Tests maxDepth enforcement, root-only traversal, full shallow tree traversal, and childCount accuracy."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/TreeTraversal/TreeTraverserTests.swift
+
+  - id: S013
+    title: Test TreeTraverser Role Filtering
+    implemented: true
+    reviewed: true
+    notes: "Created role filtering tests. Tests single role filter, multiple role filter, and no filter cases."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/TreeTraversal/TreeTraverserRoleFilterTests.swift
+
+  - id: S014
+    title: Test TreeTraverser Attribute Filtering
+    implemented: true
+    reviewed: true
+    notes: "Created attribute filtering tests. Tests filtered attributes and no filter cases."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/TreeTraversal/TreeTraverserAttributeFilterTests.swift
+
+  - id: S015
+    title: Test TreeTraverser Timeout Enforcement
+    implemented: true
+    reviewed: true
+    notes: "Created basic timeout test. Actual timeout enforcement not yet implemented in TreeTraverser - this is a known limitation that should be addressed in future iterations."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/TreeTraversal/TreeTraverserTimeoutTests.swift
+
+  - id: S016
+    title: Test ElementPath Parsing
+    implemented: true
+    reviewed: true
+    notes: "Created ElementPath parsing tests. Tests various path formats, app by name/PID, window by index/title, and error cases."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/ElementReference/ElementPathTests.swift
+
+  - id: S017
+    title: Test ElementPath Serialization and Round-Trip
+    implemented: true
+    reviewed: true
+    notes: "Created serialization and round-trip tests for ElementPath. Tests toString(), parsing round-trips, and JSON Codable conformance."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/ElementReference/ElementPathSerializationTests.swift
+
+  - id: S018
+    title: Test ElementResolver Path Validation
+    implemented: true
+    reviewed: true
+    notes: "Created path validation tests for ElementResolver. Tests invalid PID, empty path, and excessively long path rejections."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/ElementReference/ElementResolverTests.swift
+
+  - id: S019
+    title: Test ElementResolver Path Resolution Success
+    implemented: true
+    reviewed: true
+    notes: "Created success case tests for ElementResolver. Tests app by PID, window by index, and window by title resolution."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/ElementReference/ElementResolverSuccessTests.swift
+
+  - id: S020
+    title: Test ElementResolver Path Resolution Failures
+    implemented: true
+    reviewed: true
+    notes: "Created failure case tests for ElementResolver. Tests non-existent indices and titles, verifies descriptive error messages include available options."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/ElementReference/ElementResolverFailureTests.swift
+
+  - id: S021
+    title: Test ElementResolver Timeout Enforcement
+    implemented: true
+    reviewed: true
+    notes: "Created basic test. Timeout enforcement not yet implemented in ElementResolver - known limitation for future work."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/ElementReference/ElementResolverTimeoutTests.swift
+
+  - id: S022
+    title: Test ElementFinder Search by Role
+    implemented: true
+    reviewed: true
+    notes: "Created role search tests for ElementFinder. Tests search by role and verifies paths are returned."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/ElementReference/ElementFinderTests.swift
+
+  - id: S023
+    title: Test ElementFinder Search by Title
+    implemented: true
+    reviewed: true
+    notes: "Created title search tests. Tests substring matching, case-insensitive default, and case-sensitive option."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/ElementReference/ElementFinderTitleTests.swift
+
+  - id: S024
+    title: Test ElementFinder Search by Multiple Criteria
+    implemented: true
+    reviewed: true
+    notes: "Created multi-criteria search tests. Tests AND logic with role+title and role+title+value combinations."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/ElementReference/ElementFinderMultiCriteriaTests.swift
+
+  - id: S025
+    title: Test ElementFinder Result Limit Enforcement
+    implemented: true
+    reviewed: true
+    notes: "Created result limit tests. Tests maxResults enforcement, smaller result sets, and default value of 20."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/ElementReference/ElementFinderLimitTests.swift
+
+  - id: S026
+    title: Test Edge Cases and Empty Results
+    implemented: true
+    reviewed: true
+    notes: "Created edge case tests. Tests empty trees, no matches, single-component paths, and missing attributes."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/EdgeCaseTests.swift
+
+  - id: S027
+    title: Verify Swift 6 Compliance and Build
+    implemented: true
+    reviewed: true
+    notes: "Build succeeds with zero warnings. All 70 tests pass. No force-unwrapping in production code. Sandi Metz rules satisfied. All laws satisfied. Known limitation: timeout enforcement not yet implemented in TreeTraverser and ElementResolver (deferred to future work)."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/AXBridge/Types/ElementRole.swift
+
+  - id: S028
+    title: Fix TreeTraverser+Helpers.swift Line Count Violation
+    implemented: true
+    reviewed: true
+    notes: "Extracted buildChildren() and buildPath() methods to new TreeTraverser+PathBuilding.swift file. TreeTraverser+Helpers.swift now 77 lines. All tests pass."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/TreeTraversal/TreeTraverser+Helpers.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/TreeTraversal/TreeTraverser+PathBuilding.swift
+
+  - id: S029
+    title: Implement Timeout Enforcement in TreeTraverser
+    implemented: true
+    reviewed: true
+    notes: "Implemented timeout enforcement by passing deadline through traversal. Added checkTimeout() method that validates deadline before each node. Updated buildChildren to propagate timeout errors. Enhanced TreeTraverserTimeoutTests with actual timeout enforcement test. Added delay simulation to MockAXBridge. All 72 tests pass."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/TreeTraversal/TreeTraverser.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/TreeTraversal/TreeTraverser+Helpers.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/TreeTraversal/TreeTraverser+PathBuilding.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/TreeTraversal/TreeTraverserTimeoutTests.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/Mocks/MockAXBridge.swift
+
+  - id: S030
+    title: Implement Timeout Enforcement in ElementResolver
+    implemented: true
+    reviewed: true
+    notes: "Implemented timeout enforcement in ElementResolver. Added optional timeout parameter with 5.0s default. Pass deadline through walkPath and check before each component resolution. Enhanced ElementResolverTimeoutTests with actual timeout enforcement tests. All 74 tests pass."
+    touched:
+      - /Users/adam/Development/macos-accessibility-mcp/Sources/AccessibilityMCP/ElementReference/ElementResolver.swift
+      - /Users/adam/Development/macos-accessibility-mcp/Tests/AccessibilityMCPTests/ElementReference/ElementResolverTimeoutTests.swift

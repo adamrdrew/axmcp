@@ -1,7 +1,7 @@
 import Foundation
 import ApplicationServices
 
-enum ElementRole: Sendable, Equatable {
+enum ElementRole: Sendable, Equatable, Hashable {
     case application
     case window
     case button
