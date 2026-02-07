@@ -1,0 +1,64 @@
+phase:
+  id: "0001"
+  slug: skeleton
+  title: "Skeleton — MCP Server with Stdio Transport"
+  status: complete
+
+steps:
+  - id: S001
+    title: Create Package Structure
+    implemented: true
+    reviewed: true
+    notes: "Package.swift with Swift 6, MCP SDK 0.10.2, .swift-version file, directory structure created"
+    touched:
+      - Package.swift
+      - .swift-version
+      - Sources/AccessibilityMCP/
+      - Tests/AccessibilityMCPTests/
+
+  - id: S002
+    title: Implement Server Entry Point
+    implemented: true
+    reviewed: true
+    notes: "Top-level async main.swift with StdioTransport, server start, and waitUntilCompleted"
+    touched:
+      - Sources/AccessibilityMCP/main.swift
+
+  - id: S003
+    title: Implement MCP Server Handler
+    implemented: true
+    reviewed: true
+    notes: "AccessibilityServer struct wraps MCP.Server actor. Registers ListTools handler returning empty array."
+    touched:
+      - Sources/AccessibilityMCP/AccessibilityServer.swift
+
+  - id: S004
+    title: Verify MCP Handshake
+    implemented: true
+    reviewed: true
+    notes: "Handshake verified via stdio. Server responds with correct info and empty tool list."
+    touched: []
+
+  - id: S005
+    title: Add Basic Test Infrastructure
+    implemented: true
+    reviewed: true
+    notes: "3 tests using Swift Testing framework. All pass."
+    touched:
+      - Tests/AccessibilityMCPTests/ServerTests.swift
+
+  - id: S006
+    title: Create Minimal README
+    implemented: true
+    reviewed: true
+    notes: "README with project description, build/run/test instructions"
+    touched:
+      - README.md
+
+  - id: S007
+    title: Create Initial CHANGELOG
+    implemented: true
+    reviewed: true
+    notes: "CHANGELOG.md created following Keep a Changelog format with 0.1.0 entry"
+    touched:
+      - CHANGELOG.md
