@@ -1,301 +1,221 @@
 # Accessibility MCP Server
 
-A macOS MCP server written in Swift that exposes the macOS Accessibility (AX) API to LLMs through the Model Context Protocol.
+An MCP server that lets Claude (or any LLM) see and interact with macOS applications through the Accessibility API. It can read UI trees, find elements, click buttons, type text, and watch for changes.
 
-## Status
+## Quick Start
 
-This project is in active development. The current version (0.1.0) provides read, write, and observe access to macOS Accessibility trees with seven MCP tools: four for UI inspection, two for UI automation, and one for monitoring UI changes. Write operations are protected by read-only mode, application blocklist, and rate limiting.
+**Three steps to get running with Claude Desktop:**
 
-## Requirements
-
-- macOS 13.0 or later
-- Swift 6
-
-## Building
-
-Build the project using Swift Package Manager:
+### Step 1: Build it
 
 ```bash
-swift build
+git clone https://github.com/adamrdrew/macos-accessibility-mcp.git
+cd macos-accessibility-mcp
+swift build -c release
 ```
 
-## Running
+### Step 2: Tell Claude Desktop about it
 
-Run the server from the build directory:
+Open this file in a text editor:
+
+```
+~/Library/Application Support/Claude/claude_desktop_config.json
+```
+
+If the file doesn't exist, create it. Add this (replace the path with where you cloned the repo):
+
+```json
+{
+  "mcpServers": {
+    "accessibility": {
+      "command": "/Users/YOURUSERNAME/macos-accessibility-mcp/.build/release/accessibility-mcp"
+    }
+  }
+}
+```
+
+Save the file and restart Claude Desktop.
+
+### Step 3: Grant Accessibility permissions
+
+The first time you use it, macOS will ask for permission. If it doesn't, do it manually:
+
+1. Open **System Settings**
+2. Go to **Privacy & Security** > **Accessibility**
+3. Click the **+** button
+4. Add **Claude Desktop** (find it in /Applications)
+5. Restart Claude Desktop
+
+That's it. Open Claude Desktop and ask it something like:
+
+> "What windows do I have open right now?"
+
+or
+
+> "Look at the Finder UI and describe what you see."
+
+Claude will use the accessibility tools automatically.
+
+---
+
+## What Can It Do?
+
+| Tool | What it does | Example prompt |
+|------|-------------|----------------|
+| `get_ui_tree` | See an app's UI hierarchy | "Show me the UI tree for Finder" |
+| `find_element` | Find specific buttons, fields, etc. | "Find all buttons in Safari" |
+| `get_focused_element` | See what's currently focused | "What element has focus right now?" |
+| `list_windows` | List open windows | "What windows are open?" |
+| `perform_action` | Click buttons, select menus | "Click the Close button in Finder" |
+| `set_value` | Type text, toggle checkboxes | "Type 'hello' in the search field" |
+| `observe_changes` | Watch for UI changes | "Watch TextEdit for changes for 10 seconds" |
+
+You don't need to call these tools directly. Just describe what you want in natural language and Claude figures out which tools to use.
+
+## Installation
+
+### Homebrew
 
 ```bash
-swift run accessibility-mcp
+brew tap adamrdrew/accessibility-mcp
+brew install accessibility-mcp
 ```
 
-Or use the compiled binary:
+If you install via Homebrew, your Claude Desktop config is simpler:
+
+```json
+{
+  "mcpServers": {
+    "accessibility": {
+      "command": "accessibility-mcp"
+    }
+  }
+}
+```
+
+### Building from Source
+
+Requires macOS 13.0+ and Swift 6.
 
 ```bash
-.build/debug/accessibility-mcp
+git clone https://github.com/adamrdrew/macos-accessibility-mcp.git
+cd macos-accessibility-mcp
+swift build -c release
 ```
 
-**Run in read-only mode** (disables write operations):
+The binary will be at `.build/release/accessibility-mcp`.
 
-```bash
-swift run accessibility-mcp --read-only
+## Safety Features
+
+Write operations (clicking, typing) have safety guards built in:
+
+**Read-only mode** disables all write operations:
+
+```json
+{
+  "mcpServers": {
+    "accessibility": {
+      "command": "accessibility-mcp",
+      "args": ["--read-only"]
+    }
+  }
+}
 ```
 
-Or using environment variable:
+**Application blocklist** prevents writes to sensitive apps. By default, Terminal, iTerm2, System Settings, and Keychain Access are blocked. Reads still work on blocked apps.
 
-```bash
-ACCESSIBILITY_MCP_READ_ONLY=1 swift run accessibility-mcp
+**Rate limiting** prevents runaway automation (default: 10 actions/second).
+
+### Configuration
+
+| Environment Variable | CLI Flag | Default | Description |
+|---------------------|----------|---------|-------------|
+| `ACCESSIBILITY_MCP_READ_ONLY` | `--read-only` | `false` | Disable write operations |
+| `ACCESSIBILITY_MCP_RATE_LIMIT` | - | `10` | Max write operations per second |
+| `ACCESSIBILITY_MCP_BLOCKLIST` | - | (see above) | Comma-separated bundle IDs to block for writes |
+
+Example with custom config:
+
+```json
+{
+  "mcpServers": {
+    "accessibility": {
+      "command": "accessibility-mcp",
+      "env": {
+        "ACCESSIBILITY_MCP_RATE_LIMIT": "5",
+        "ACCESSIBILITY_MCP_BLOCKLIST": "com.example.app1,com.example.app2"
+      }
+    }
+  }
+}
 ```
 
-## Testing
-
-Run the test suite:
-
-```bash
-swift test
-```
-
-## How It Works
-
-This server uses the Model Context Protocol (MCP) to communicate with LLM clients like Claude Desktop over stdio transport. It provides structured, read-only access to any macOS application's UI through the Accessibility API.
-
-## Accessibility Permissions
-
-Before using this server, you must grant Accessibility permissions to the terminal or application running the server:
-
-1. Open **System Settings** > **Privacy & Security** > **Accessibility**
-2. Click the lock icon and authenticate
-3. Add your terminal app (Terminal.app, iTerm2, etc.) to the allowed applications
-4. Restart your terminal
-
-Without these permissions, the server will return permission denied errors.
-
-## MCP Tools
-
-The server provides seven MCP tools: four read-only tools for inspecting application UI, one observation tool for monitoring UI changes, and two write tools for UI automation.
-
-### Read-Only Tools
+## MCP Tools Reference
 
 ### get_ui_tree
 
-Get the accessibility tree for an application with configurable depth limiting and filtering.
+Get the accessibility tree for an application.
 
 **Parameters:**
 - `app` (required): Application name (e.g., "Finder") or numeric PID
-- `depth` (optional): Maximum tree depth to traverse (default: 3, prevents overwhelming output)
-- `include_attributes` (optional): Array of attribute names to include (not yet implemented)
-- `filter_roles` (optional): Array of role names to filter by (not yet implemented)
+- `depth` (optional): Maximum tree depth (default: 3)
 
-**Returns:** JSON object with:
-- `tree`: Hierarchical tree structure with role, title, value, children, actions, path, childCount, depth
-- `hasMoreResults`: Boolean indicating if tree was truncated
-- `resultCount`: Total number of nodes in the returned tree
-- `depth`: The depth limit used
+**Returns:** Hierarchical tree with role, title, value, children, actions, and element paths.
 
-**Example:**
+**Example request:**
 ```json
-{
-  "app": "Finder",
-  "depth": 2
-}
-```
-
-**Response:**
-```json
-{
-  "tree": {
-    "role": "Application",
-    "title": "Finder",
-    "value": null,
-    "children": [...],
-    "actions": [],
-    "path": "app(1234)",
-    "childCount": 5,
-    "depth": 0
-  },
-  "hasMoreResults": false,
-  "resultCount": 42,
-  "depth": 2
-}
+{ "app": "Finder", "depth": 2 }
 ```
 
 ### find_element
 
-Search for UI elements matching specific criteria within an application.
+Search for UI elements matching criteria.
 
 **Parameters:**
 - `app` (required): Application name or PID
-- `role` (optional): Element role to match (e.g., "Button", "TextField")
+- `role` (optional): Element role (e.g., "Button", "TextField")
 - `title` (optional): Title substring to match (case-insensitive)
-- `value` (optional): Value to match
-- `identifier` (optional): Accessibility identifier to match
-- `max_results` (optional): Maximum results to return (default: 20)
+- `max_results` (optional): Maximum results (default: 20)
 
-**Returns:** JSON object with:
-- `elements`: Array of matching elements with role, title, value, and path
-- `hasMoreResults`: Boolean indicating if more results exist beyond the limit
-- `resultCount`: Number of results returned
-
-**Example:**
+**Example request:**
 ```json
-{
-  "app": "Finder",
-  "role": "Button",
-  "title": "Save",
-  "max_results": 10
-}
+{ "app": "Finder", "role": "Button", "title": "Save" }
 ```
 
 ### get_focused_element
 
-Get the currently focused UI element, either system-wide or within a specific application.
+Get the currently focused UI element.
 
 **Parameters:**
-- `app` (optional): Application name or PID. If omitted, returns system-wide focused element.
+- `app` (optional): Application name or PID. Omit for system-wide focus.
 
-**Returns:** JSON object with:
-- `element`: Element info (role, title, value, path, actions) or null if no focus
-- `hasFocus`: Boolean indicating whether any element has focus
-
-**Example (system-wide):**
+**Example request:**
 ```json
 {}
 ```
 
-**Example (app-specific):**
-```json
-{
-  "app": "Finder"
-}
-```
-
 ### list_windows
 
-List all windows for an application or system-wide.
+List windows for an application or system-wide.
 
 **Parameters:**
-- `app` (optional): Application name or PID. If omitted, lists all windows system-wide.
-- `include_minimized` (optional): Include minimized windows (default: false)
+- `app` (optional): Application name or PID. Omit for all windows.
 
-**Returns:** JSON object with:
-- `windows`: Array of window info with title, position, size, minimized status, frontmost status, and owning app
-
-**Example:**
+**Example request:**
 ```json
-{
-  "app": "Finder",
-  "include_minimized": true
-}
+{ "app": "Finder" }
 ```
-
-### Observation Tools
-
-Observation tools are available in both normal and read-only modes since they are passive listeners that do not modify UI state.
-
-### observe_changes
-
-Watch for UI change events in an application for a specified duration. Events are collected and returned as a batch when the observation period ends.
-
-**Parameters:**
-- `app` (required): Application name or PID
-- `events` (optional): Array of event types to watch. If omitted, all event types are monitored. Valid types:
-  - `value_changed` - Element value changed (text fields, sliders, etc.)
-  - `focus_changed` - Focus moved to a different element
-  - `window_created` - A new window was created
-  - `window_destroyed` - A window was closed
-  - `title_changed` - An element's title changed
-- `element_path` (optional): Path to a specific element to observe. If omitted, observes the entire application.
-- `duration` (optional): Observation duration in seconds (default: 30, max: 300). Values beyond max are silently clamped.
-
-**Returns:** JSON object with:
-- `events`: Array of collected events, each containing:
-  - `timestamp`: ISO 8601 timestamp of the event
-  - `eventType`: Type of change detected
-  - `elementRole`: Role of the affected element (if available)
-  - `elementTitle`: Title of the affected element (if available)
-  - `elementPath`: Path to the affected element (if determinable)
-  - `newValue`: New value after the change (if applicable)
-- `totalEventsCollected`: Total number of events seen
-- `eventsReturned`: Number of events in the response
-- `truncated`: Whether events were truncated at the 1000-event limit
-- `durationRequested`: The observation duration used
-- `durationActual`: Actual elapsed time
-- `applicationTerminated`: Whether the app quit during observation
-- `notes`: Array of informational messages (clamping, truncation, etc.)
-
-**Example:**
-```json
-{
-  "app": "TextEdit",
-  "events": ["value_changed", "title_changed"],
-  "duration": 10
-}
-```
-
-**Response:**
-```json
-{
-  "events": [
-    {
-      "timestamp": "2026-02-07T18:30:00Z",
-      "eventType": "value_changed",
-      "elementRole": "AXTextArea",
-      "elementTitle": null,
-      "elementPath": null,
-      "newValue": null
-    },
-    {
-      "timestamp": "2026-02-07T18:30:01Z",
-      "eventType": "title_changed",
-      "elementRole": "AXWindow",
-      "elementTitle": "Untitled",
-      "elementPath": null,
-      "newValue": null
-    }
-  ],
-  "totalEventsCollected": 2,
-  "eventsReturned": 2,
-  "truncated": false,
-  "durationRequested": 10,
-  "durationActual": 10.003,
-  "applicationTerminated": false,
-  "notes": []
-}
-```
-
-**Limitations:**
-- Events are batched and returned at the end of the duration (not streamed in real-time)
-- Maximum 1000 events per observation (excess events are dropped with a truncation note)
-- Maximum duration is 300 seconds (5 minutes)
-- The MCP tool call blocks for the entire duration
-- If the observed application terminates, events collected so far are returned with `applicationTerminated: true`
-
-### Write Tools
-
-Write tools are disabled when running in read-only mode (`--read-only` flag or `ACCESSIBILITY_MCP_READ_ONLY=1` env var).
 
 ### perform_action
 
-Perform an accessibility action on a UI element (press button, select menu, etc.).
+Click buttons, select menu items, and perform other UI actions.
 
 **Parameters:**
 - `app` (required): Application name or PID
-- `elementPath` (required): Element path from find_element or get_ui_tree (e.g., "app(1234)/window[0]/button[@title='OK']")
-- `action` (required): Action name. Supported actions:
-  - `AXPress` - Press a button or activate an element
-  - `AXPick` - Pick/select an item (menus, lists)
-  - `AXShowMenu` - Show a context menu
-  - `AXConfirm` - Confirm a dialog
-  - `AXCancel` - Cancel a dialog
-  - `AXRaise` - Bring a window to front
-  - `AXIncrement` - Increment a value (stepper, slider)
-  - `AXDecrement` - Decrement a value (stepper, slider)
+- `elementPath` (required): Element path from `get_ui_tree` or `find_element`
+- `action` (required): Action name (`AXPress`, `AXPick`, `AXShowMenu`, `AXConfirm`, `AXCancel`, `AXRaise`, `AXIncrement`, `AXDecrement`)
 
-**Returns:** JSON object with:
-- `success`: Boolean indicating success
-- `action`: The action that was performed
-- `elementState`: Post-action element state (role, title, value, enabled, focused, actions, path)
-- `rateLimitWarning`: Optional warning if rate limit was applied
-
-**Example:**
+**Example request:**
 ```json
 {
   "app": "Finder",
@@ -304,50 +224,18 @@ Perform an accessibility action on a UI element (press button, select menu, etc.
 }
 ```
 
-**Response:**
-```json
-{
-  "success": true,
-  "action": "AXPress",
-  "elementState": {
-    "role": "AXButton",
-    "title": "Close",
-    "value": null,
-    "enabled": true,
-    "focused": false,
-    "actions": ["AXPress"],
-    "path": "app(1234)/window[0]/button[@title='Close']"
-  },
-  "rateLimitWarning": null
-}
-```
-
-**Safety checks:**
-- Blocked in read-only mode
-- Blocked for applications on blocklist (Terminal, iTerm2, System Settings, Keychain Access by default)
-- Rate limited (default: 10 actions/second)
-- Returns post-action state for verification
+Returns post-action element state so you can verify the action worked.
 
 ### set_value
 
-Set the value of a UI element (text field, checkbox, slider, etc.).
+Set the value of text fields, checkboxes, sliders, etc.
 
 **Parameters:**
 - `app` (required): Application name or PID
-- `elementPath` (required): Element path from find_element or get_ui_tree
-- `value` (required): Value to set. Type depends on element:
-  - String for text fields
-  - Boolean (true/false) for checkboxes
-  - Number for sliders, steppers, number fields
+- `elementPath` (required): Element path from `get_ui_tree` or `find_element`
+- `value` (required): Value to set (string, boolean, or number depending on element)
 
-**Returns:** JSON object with:
-- `success`: Boolean indicating success
-- `previousValue`: The value before the change (string or null)
-- `newValue`: The value after the change (string or null)
-- `elementState`: Post-change element state
-- `rateLimitWarning`: Optional warning if rate limit was applied
-
-**Example (text field):**
+**Example request:**
 ```json
 {
   "app": "TextEdit",
@@ -356,167 +244,78 @@ Set the value of a UI element (text field, checkbox, slider, etc.).
 }
 ```
 
-**Example (checkbox):**
+Returns previous value, new value, and post-change element state.
+
+### observe_changes
+
+Watch for UI changes in an application.
+
+**Parameters:**
+- `app` (required): Application name or PID
+- `events` (optional): Event types to watch (`value_changed`, `focus_changed`, `window_created`, `window_destroyed`, `title_changed`). Omit for all.
+- `duration` (optional): Seconds to observe (default: 30, max: 300)
+
+**Example request:**
 ```json
-{
-  "app": "Safari",
-  "elementPath": "app(5678)/window[0]/checkbox[@title='Enable JavaScript']",
-  "value": true
-}
+{ "app": "TextEdit", "events": ["value_changed"], "duration": 10 }
 ```
 
-**Example (slider):**
-```json
-{
-  "app": "Music",
-  "elementPath": "app(9012)/window[0]/slider[@title='Volume']",
-  "value": 75
-}
-```
+Events are batched and returned when the duration ends. Max 1000 events per observation.
 
-**Response:**
-```json
-{
-  "success": true,
-  "previousValue": "Hello",
-  "newValue": "Hello, world!",
-  "elementState": {
-    "role": "AXTextField",
-    "title": null,
-    "value": "Hello, world!",
-    "enabled": true,
-    "focused": true,
-    "actions": [],
-    "path": "app(1234)/window[0]/textfield[0]"
-  },
-  "rateLimitWarning": null
-}
-```
+## Troubleshooting
 
-**Safety checks:**
-- Blocked in read-only mode
-- Blocked for applications on blocklist
-- Rate limited (default: 10 actions/second)
-- Automatic value type coercion based on JSON type
-- Returns previous and new values for verification
+### "permission_denied" error
 
-## Safety Features
+Accessibility permissions aren't granted.
 
-### Read-Only Mode
+1. Open **System Settings** > **Privacy & Security** > **Accessibility**
+2. Add the application running the server (Claude Desktop or your terminal)
+3. Restart the application after granting permissions
 
-Disable all write operations while preserving read access. Useful for safe exploration or when automation is not needed.
+### "app_not_running" error
 
-**Enable via CLI flag:**
-```bash
-swift run accessibility-mcp --read-only
-```
+The app name doesn't match any running application. Use the exact name as shown in the Dock or Activity Monitor. You can also use a numeric PID.
 
-**Enable via environment variable:**
-```bash
-ACCESSIBILITY_MCP_READ_ONLY=1 swift run accessibility-mcp
-```
+### "timeout" error
 
-When enabled:
-- `perform_action` and `set_value` are hidden from the tool list
-- Attempting to call write tools returns a structured error with guidance
-- All read-only tools continue to work normally
+The UI tree is too large. Reduce the `depth` parameter (try 1 or 2) or use `find_element` with specific criteria instead.
 
-### Application Blocklist
+### "element_path_error" or "invalid_element" error
 
-Prevent write operations on security-sensitive applications. Read operations are always permitted.
+The UI changed since you got the element path. Re-run `get_ui_tree` or `find_element` to get fresh paths.
 
-**Default blocklist:**
-- Keychain Access (`com.apple.keychainaccess`)
-- Terminal (`com.apple.Terminal`)
-- iTerm2 (`com.googlecode.iterm2`)
-- System Settings (`com.apple.systempreferences`)
+### "blocklisted_application" error
 
-**Add custom apps to blocklist:**
-```bash
-ACCESSIBILITY_MCP_BLOCKLIST="com.example.app1,com.example.app2" swift run accessibility-mcp
-```
+Write operations are blocked for this app. Read operations still work. See the Safety Features section to customize the blocklist.
 
-Custom apps are merged with the default blocklist. Use bundle identifiers, not app names.
+### "read_only_mode" error
 
-When a blocklisted app is targeted:
-- Write operations return a structured error: "Application 'X' is blocklisted for write operations"
-- Read operations continue to work
-- Error includes guidance directing users to the configuration
+Remove the `--read-only` flag or unset `ACCESSIBILITY_MCP_READ_ONLY`.
 
-### Rate Limiting
+### Claude Desktop can't connect to the server
 
-Prevent runaway automation loops by limiting write operations per second.
-
-**Default:** 10 actions per second
-
-**Configure custom limit:**
-```bash
-ACCESSIBILITY_MCP_RATE_LIMIT=5 swift run accessibility-mcp
-```
-
-When rate limit is exceeded:
-- The operation is **delayed** (not rejected)
-- A warning is included in the response: "Rate limit reached. Delayed 0.123s"
-- This allows controlled bursts while preventing infinite loops
-
-## Configuration Reference
-
-| Environment Variable | CLI Flag | Default | Description |
-|---------------------|----------|---------|-------------|
-| `ACCESSIBILITY_MCP_READ_ONLY` | `--read-only` | `false` | Disable write operations |
-| `ACCESSIBILITY_MCP_RATE_LIMIT` | - | `10` | Max write operations per second |
-| `ACCESSIBILITY_MCP_BLOCKLIST` | - | (see below) | Comma-separated bundle IDs to block |
-
-**Default blocklist:** `com.apple.keychainaccess,com.apple.Terminal,com.googlecode.iterm2,com.apple.systempreferences`
-
-## Error Handling
-
-All tools return structured errors with:
-- `operation`: The tool name that failed
-- `errorType`: Category of error (e.g., "app_not_running", "permission_denied", "timeout")
-- `message`: Human-readable error description
-- `app`: The application involved (if applicable)
-- `guidance`: Actionable next steps to resolve the error
-
-**Common errors:**
-- **app_not_running**: The specified application is not currently running. Start the application and try again.
-- **permission_denied**: Accessibility permissions not granted. See "Accessibility Permissions" section above.
-- **timeout**: Operation exceeded time limit. Try reducing depth or narrowing search criteria.
-- **invalid_parameter**: A parameter value is invalid (e.g., negative depth, zero maxResults).
-- **read_only_mode**: Write operation attempted in read-only mode. Remove `--read-only` flag or `ACCESSIBILITY_MCP_READ_ONLY` env var.
-- **blocklisted_application**: Write operation attempted on blocklisted app. Read operations are still permitted.
-- **action_not_supported**: The requested action is not supported by the target element. Use `get_ui_tree` or `find_element` to check available actions.
-- **element_path_error**: Element path is invalid or element not found. Check path syntax and ensure element exists.
-- **observer_creation_failed**: Failed to create accessibility observer. Ensure permissions are granted.
-- **application_terminated**: Observed application terminated during observation. Partial results may be returned.
+- Check the binary path in `claude_desktop_config.json` is correct and absolute
+- Make sure the binary has execute permissions: `chmod +x /path/to/accessibility-mcp`
+- Restart Claude Desktop after editing the config
+- Check Console.app for logs under subsystem `com.adamrdrew.accessibility-mcp`
 
 ## Limitations
 
-Current limitations (to be addressed in future phases):
-- Observation uses a batch model (events returned at end of duration, not streamed in real-time)
-- Window position/size/minimized/frontmost detection is placeholder (returns default values)
+- Observation events are batched (returned at end of duration, not streamed)
+- Write operations cannot be undone
+- Maximum 1000 events per observation, 300s max duration
 - No interactive confirmation dialogs (MCP protocol limitation)
-- Write operations cannot be undone - use with caution
-
-## Important Notes on Write Operations
-
-**Actions have real side effects.** `perform_action` and `set_value` modify application state just like user interaction. This includes:
-- Closing windows and dialogs
-- Deleting or modifying content
-- Executing commands
-- Changing settings
-
-**Always verify intent before automating actions.** Use the agency loop:
-1. Find the element with `find_element` or `get_ui_tree`
-2. Perform the action with `perform_action` or `set_value`
-3. Verify the outcome using the returned `elementState`
-
-**Use read-only mode for safe exploration.** When you only need to inspect UI, not modify it, enable read-only mode to prevent accidental changes.
 
 ## Development
 
-This project uses the Ushabti iterative agile agentic development framework. See `.ushabti/` for phase plans and progress.
+Run the test suite:
+
+```bash
+swift test
+```
+
+This project uses [Ushabti](https://github.com/adamrdrew/ushabti) for iterative development. See `.ushabti/` for phase plans and progress.
 
 ## License
 
-TBD
+MIT

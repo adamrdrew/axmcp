@@ -5,37 +5,16 @@ struct ErrorConverter: Sendable {
         _ error: AppResolutionError,
         operation: String
     ) -> ToolExecutionError {
-        switch error {
-        case .notRunning(let app):
-            return ToolExecutionError.toolError(
-                ToolError(
-                    operation: operation,
-                    errorType: "app_not_running",
-                    message: "Application '\(app)' is not running",
-                    app: app,
-                    guidance: "Start the application and try again"
-                )
+        let pair = appErrorContent(error)
+        return ToolExecutionError.toolError(
+            ToolError(
+                operation: operation,
+                errorType: pair.errorType,
+                message: pair.message,
+                app: pair.app,
+                guidance: pair.guidance
             )
-        case .multipleMatches(let app, let matches):
-            return ToolExecutionError.toolError(
-                ToolError(
-                    operation: operation,
-                    errorType: "multiple_matches",
-                    message: "Multiple apps match '\(app)': \(matches.joined(separator: ", "))",
-                    app: app,
-                    guidance: "Use a more specific app name"
-                )
-            )
-        case .invalidIdentifier(let id):
-            return ToolExecutionError.toolError(
-                ToolError(
-                    operation: operation,
-                    errorType: "invalid_identifier",
-                    message: "Invalid app identifier: '\(id)'",
-                    guidance: "Provide a valid app name or PID"
-                )
-            )
-        }
+        )
     }
 
     static func convertParameterError(
@@ -47,65 +26,27 @@ struct ErrorConverter: Sendable {
                 operation: operation,
                 errorType: "invalid_parameter",
                 message: "Invalid parameter: \(error)",
-                guidance: "Check parameter values"
+                guidance: "Check parameter names and types against the tool schema."
             )
         )
     }
+}
 
-    static func convertAccessibilityError(
-        _ error: AccessibilityError,
-        operation: String,
-        app: String?
-    ) -> ToolExecutionError {
+extension ErrorConverter {
+    private static func appErrorContent(
+        _ error: AppResolutionError
+    ) -> (errorType: String, message: String, app: String?, guidance: String) {
         switch error {
-        case .permissionDenied(let guidance):
-            return ToolExecutionError.toolError(
-                ToolError(
-                    operation: operation,
-                    errorType: "permission_denied",
-                    message: "Accessibility permissions not granted",
-                    app: app,
-                    guidance: guidance
-                )
-            )
-        default:
-            return ToolExecutionError.toolError(
-                ToolError(
-                    operation: operation,
-                    errorType: "accessibility_error",
-                    message: "Accessibility error: \(error)",
-                    app: app
-                )
-            )
-        }
-    }
-
-    static func convertTraversalError(
-        _ error: TreeTraversalError,
-        operation: String,
-        app: String,
-        guidance: String
-    ) -> ToolExecutionError {
-        switch error {
-        case .timeoutExceeded(let timeout):
-            return ToolExecutionError.toolError(
-                ToolError(
-                    operation: operation,
-                    errorType: "timeout",
-                    message: "\(operation) exceeded \(timeout)s timeout",
-                    app: app,
-                    guidance: guidance
-                )
-            )
-        default:
-            return ToolExecutionError.toolError(
-                ToolError(
-                    operation: operation,
-                    errorType: "traversal_error",
-                    message: "\(operation) failed: \(error)",
-                    app: app
-                )
-            )
+        case .notRunning(let app):
+            return ("app_not_running", "Application '\(app)' is not running", app,
+                    "Start the application and try again. Use the exact app name as it appears in the Dock or Activity Monitor.")
+        case .multipleMatches(let app, let matches):
+            let names = matches.joined(separator: ", ")
+            return ("multiple_matches", "Multiple apps match '\(app)': \(names)", app,
+                    "Use a more specific name. Running matches: \(names)")
+        case .invalidIdentifier(let id):
+            return ("invalid_identifier", "Invalid app identifier: '\(id)'", nil,
+                    "Provide a valid app name (e.g. \"Finder\") or numeric PID.")
         }
     }
 }

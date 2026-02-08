@@ -6,13 +6,15 @@ extension ErrorConverter {
         operation: String,
         app: String
     ) -> ToolExecutionError {
-        ToolExecutionError.toolError(
+        let msg = elementPathMessage(error)
+        let guide = elementPathGuidance(error)
+        return ToolExecutionError.toolError(
             ToolError(
                 operation: operation,
                 errorType: "element_path_error",
-                message: "Element path error: \(error)",
+                message: msg,
                 app: app,
-                guidance: "Check element path syntax and ensure element exists"
+                guidance: guide
             )
         )
     }
@@ -22,13 +24,14 @@ extension ErrorConverter {
         operation: String,
         app: String
     ) -> ToolExecutionError {
-        ToolExecutionError.toolError(
+        let guide = blocklistGuidance(error)
+        return ToolExecutionError.toolError(
             ToolError(
                 operation: operation,
                 errorType: "blocklisted_application",
                 message: "Application '\(app)' is blocklisted for write operations",
                 app: app,
-                guidance: error.guidance
+                guidance: guide
             )
         )
     }
@@ -41,7 +44,7 @@ extension ErrorConverter {
                 operation: operation,
                 errorType: "read_only_mode",
                 message: "Write operations are disabled in read-only mode",
-                guidance: "Remove --read-only flag or ACCESSIBILITY_MCP_READ_ONLY env var"
+                guidance: "Remove --read-only flag or unset ACCESSIBILITY_MCP_READ_ONLY environment variable to enable write operations."
             )
         )
     }
@@ -57,7 +60,7 @@ extension ErrorConverter {
                 errorType: "action_not_supported",
                 message: "Element does not support action '\(action)'",
                 app: app,
-                guidance: "Check available actions for this element"
+                guidance: "Use get_ui_tree or find_element to check the 'actions' array for this element's supported actions."
             )
         )
     }

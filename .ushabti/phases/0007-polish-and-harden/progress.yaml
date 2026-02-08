@@ -1,0 +1,164 @@
+phase:
+  id: "0007"
+  slug: polish-and-harden
+  title: "Polish & Harden"
+  status: complete
+
+steps:
+  - id: S001
+    title: "Add structured logging infrastructure"
+    implemented: true
+    reviewed: true
+    notes: "Created Logging/ directory with LogDestination protocol, OSLogDestination, MCPLogger, LogCategory. Added startup and tool invocation logging."
+    touched:
+      - Sources/AccessibilityMCP/Logging/LogDestination.swift
+      - Sources/AccessibilityMCP/Logging/OSLogDestination.swift
+      - Sources/AccessibilityMCP/Logging/MCPLogger.swift
+      - Sources/AccessibilityMCP/Logging/LogCategory.swift
+      - Sources/AccessibilityMCP/main.swift
+      - Sources/AccessibilityMCP/AccessibilityServer.swift
+
+  - id: S002
+    title: "Write tests for logging behavior"
+    implemented: true
+    reviewed: true
+    notes: "Created MockLogDestination and 6 logging tests verifying levels, categories, and L36 compliance."
+    touched:
+      - Tests/AccessibilityMCPTests/Mocks/MockLogDestination.swift
+      - Tests/AccessibilityMCPTests/LoggingTests.swift
+
+  - id: S003
+    title: "Audit and improve error messages"
+    implemented: true
+    reviewed: true
+    notes: "Updated ErrorConverter, ErrorConverter+WriteOperations, ErrorConverter+ObserverOperations, PerformActionHandler+ErrorConversion, SetValueHandler+ErrorConversion, PermissionChecker with actionable guidance. Removed dead BlocklistError.guidance property."
+    touched:
+      - Sources/AccessibilityMCP/Tools/ErrorConverter.swift
+      - Sources/AccessibilityMCP/Tools/ErrorConverter+WriteOperations.swift
+      - Sources/AccessibilityMCP/Tools/ErrorConverter+ObserverOperations.swift
+      - Sources/AccessibilityMCP/Tools/PerformActionHandler+ErrorConversion.swift
+      - Sources/AccessibilityMCP/Tools/SetValueHandler+ErrorConversion.swift
+      - Sources/AccessibilityMCP/AXBridge/PermissionChecker.swift
+      - Sources/AccessibilityMCP/Security/BlocklistError.swift
+
+  - id: S004
+    title: "Write tests for improved error messages"
+    implemented: true
+    reviewed: true
+    notes: "12 tests verifying all error types have non-nil actionable guidance with expected keywords."
+    touched:
+      - Tests/AccessibilityMCPTests/ErrorGuidanceTests.swift
+
+  - id: S005
+    title: "Harden edge cases"
+    implemented: true
+    reviewed: true
+    notes: "11 tests covering app termination, invalidUIElement, cannotComplete, missing attributes, stale references, observer errors."
+    touched:
+      - Tests/AccessibilityMCPTests/EdgeCaseHardeningTests.swift
+
+  - id: S006
+    title: "Complete CHANGELOG.md for v0.1.0"
+    implemented: true
+    reviewed: true
+    notes: "Comprehensive v0.1.0 entry documenting all features from phases 1-6."
+    touched:
+      - CHANGELOG.md
+
+  - id: S007
+    title: "Polish README.md"
+    implemented: true
+    reviewed: true
+    notes: "Added Homebrew installation, Claude Desktop configuration JSON, troubleshooting section, improved permission setup instructions."
+    touched:
+      - README.md
+
+  - id: S008
+    title: "Create GitHub Actions release workflow"
+    implemented: true
+    reviewed: true
+    notes: "Created test.yml (CI on push/PR) and release.yml (universal binary on tag push)."
+    touched:
+      - .github/workflows/test.yml
+      - .github/workflows/release.yml
+
+  - id: S009
+    title: "Create Homebrew tap formula"
+    implemented: true
+    reviewed: true
+    notes: "Created Formula/accessibility-mcp.rb with placeholder SHA256. Tap setup documented in README."
+    touched:
+      - Formula/accessibility-mcp.rb
+
+  - id: S010
+    title: "Run full test suite and verify"
+    implemented: true
+    reviewed: true
+    notes: "256 tests in 50 suites, all passing. Release build clean. No warnings. Single binary with system-only deps."
+    touched: []
+
+  - id: S011
+    title: "Document Claude Desktop integration verification"
+    implemented: true
+    reviewed: true
+    notes: "Manual verification procedure documented in review.md with test steps table."
+    touched:
+      - .ushabti/phases/0007-polish-and-harden/review.md
+
+  - id: S012
+    title: "Refactor ErrorConverter.swift to meet 100-line limit"
+    implemented: true
+    reviewed: true
+    notes: "Extracted convertAccessibilityError and convertTraversalError into ErrorConverter+ReadOperations.swift. Main file now contains only convertAppError and convertParameterError. All 257 tests pass."
+    touched:
+      - Sources/AccessibilityMCP/Tools/ErrorConverter.swift
+      - Sources/AccessibilityMCP/Tools/ErrorConverter+ReadOperations.swift
+
+  - id: S013
+    title: "Refactor ErrorConverter+WriteOperations.swift to meet 100-line limit"
+    implemented: true
+    reviewed: true
+    notes: "Extracted elementPathMessage, elementPathGuidance, blocklistGuidance into ErrorConverter+WriteMessages.swift. WriteOperations now contains only conversion methods. All 257 tests pass."
+    touched:
+      - Sources/AccessibilityMCP/Tools/ErrorConverter+WriteOperations.swift
+      - Sources/AccessibilityMCP/Tools/ErrorConverter+WriteMessages.swift
+
+  - id: S014
+    title: "Verify Sandi Metz compliance after refactoring"
+    implemented: true
+    reviewed: true
+    notes: "All ErrorConverter files verified: ErrorConverter.swift 49, +ReadOperations 71, +WriteOperations 63, +WriteMessages 51, +ObserverOperations 71 logical lines. All ≤100. 257 tests pass."
+    touched: []
+
+  - id: S015
+    title: "Refactor AccessibilityServer.swift to meet Sandi Metz rules"
+    implemented: true
+    reviewed: true
+    notes: "Created ToolRegistry (15 lines) with extensions for read/write/observe tool definitions. Created ToolDispatcher (37 lines) with extensions for read/write/observe dispatch. Injected LiveAppResolver and LiveAXBridge via ToolDispatcher initializer. AccessibilityServer slimmed to 41 lines. Deleted old AccessibilityServer+WriteTools.swift and +ObserveTools.swift. Updated ServerTests to use ToolRegistry. All methods ≤5 lines. 257 tests pass, zero warnings."
+    touched:
+      - Sources/AccessibilityMCP/AccessibilityServer.swift
+      - Sources/AccessibilityMCP/ToolRegistry.swift
+      - Sources/AccessibilityMCP/ToolRegistry+ReadTools.swift
+      - Sources/AccessibilityMCP/ToolRegistry+WriteTools.swift
+      - Sources/AccessibilityMCP/ToolRegistry+ObserveTools.swift
+      - Sources/AccessibilityMCP/ToolDispatcher.swift
+      - Sources/AccessibilityMCP/ToolDispatcher+ReadTools.swift
+      - Sources/AccessibilityMCP/ToolDispatcher+WriteTools.swift
+      - Sources/AccessibilityMCP/ToolDispatcher+ObserveTools.swift
+      - Tests/AccessibilityMCPTests/ServerTests.swift
+
+  - id: S016
+    title: "Verify L36 compliance in error descriptions"
+    implemented: true
+    reviewed: true
+    notes: "Audited all 8 error types. Found potential L36 issue: error log line interpolated full error which could include element path strings with UI titles. Fixed ToolDispatcher to log only error type name (type(of: error)) instead of full error. Added test verifying type name contains no UI data. 7/8 types inherently safe; ElementPathError remediated via log sanitization. 257 tests pass."
+    touched:
+      - Sources/AccessibilityMCP/ToolDispatcher.swift
+      - Tests/AccessibilityMCPTests/LoggingTests.swift
+
+  - id: S017
+    title: "Final Sandi Metz and L36 verification"
+    implemented: true
+    reviewed: true
+    notes: "All 14 refactored files ≤100 lines (max 71). Release build clean, zero warnings. 257 tests in 50 suites pass. L36 verified: error log uses type(of:error) only."
+    touched: []

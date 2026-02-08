@@ -25,14 +25,10 @@ extension SetValueHandler {
         _ error: BlocklistError,
         _ params: SetValueParameters
     ) -> ToolExecutionError {
-        ToolExecutionError.toolError(
-            ToolError(
-                operation: "set_value",
-                errorType: "blocklisted_application",
-                message: "Application '\(params.app)' is blocklisted for write operations",
-                app: params.app,
-                guidance: error.guidance
-            )
+        ErrorConverter.convertBlocklistError(
+            error,
+            operation: "set_value",
+            app: params.app
         )
     }
 
@@ -40,14 +36,10 @@ extension SetValueHandler {
         _ error: ElementPathError,
         _ params: SetValueParameters
     ) -> ToolExecutionError {
-        ToolExecutionError.toolError(
-            ToolError(
-                operation: "set_value",
-                errorType: "element_path_error",
-                message: "Failed to resolve element path: \(error)",
-                app: params.app,
-                guidance: "Check element path syntax and ensure element exists"
-            )
+        ErrorConverter.convertElementPathError(
+            error,
+            operation: "set_value",
+            app: params.app
         )
     }
 
@@ -71,7 +63,8 @@ extension SetValueHandler {
                 operation: "set_value",
                 errorType: "unknown_error",
                 message: "Unexpected error: \(error)",
-                app: params.app
+                app: params.app,
+                guidance: "This is an unexpected error. Check that the application is running and permissions are granted."
             )
         )
     }

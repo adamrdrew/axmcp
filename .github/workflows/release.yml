@@ -1,0 +1,37 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build universal binary
+        run: swift build -c release --arch arm64 --arch x86_64
+
+      - name: Verify binary
+        run: |
+          BINARY=".build/apple/Products/Release/accessibility-mcp"
+          lipo -info "$BINARY"
+          otool -L "$BINARY"
+
+      - name: Generate checksum
+        run: |
+          BINARY=".build/apple/Products/Release/accessibility-mcp"
+          shasum -a 256 "$BINARY" > accessibility-mcp.sha256
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            .build/apple/Products/Release/accessibility-mcp
+            accessibility-mcp.sha256
+          generate_release_notes: true

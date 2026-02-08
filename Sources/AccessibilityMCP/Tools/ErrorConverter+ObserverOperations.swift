@@ -14,7 +14,7 @@ extension ErrorConverter {
                     errorType: "invalid_application",
                     message: "Invalid application: \(reason)",
                     app: app,
-                    guidance: "Check the application name or PID"
+                    guidance: "Verify the application name or PID. The app must be running to observe."
                 )
             )
         case .observerCreationFailed(let reason):
@@ -24,7 +24,7 @@ extension ErrorConverter {
                     errorType: "observer_creation_failed",
                     message: "Failed to create observer: \(reason)",
                     app: app,
-                    guidance: "Ensure accessibility permissions are granted"
+                    guidance: "Open System Settings > Privacy & Security > Accessibility and ensure this application has permission."
                 )
             )
         case .durationExceeded(let max):
@@ -33,7 +33,8 @@ extension ErrorConverter {
                     operation: operation,
                     errorType: "duration_exceeded",
                     message: "Duration exceeds maximum of \(max)s",
-                    app: app
+                    app: app,
+                    guidance: "Set duration to \(max) seconds or less."
                 )
             )
         case .applicationTerminated(let pid):
@@ -41,9 +42,9 @@ extension ErrorConverter {
                 ToolError(
                     operation: operation,
                     errorType: "application_terminated",
-                    message: "Application (PID \(pid)) terminated",
+                    message: "Application (PID \(pid)) terminated during observation",
                     app: app,
-                    guidance: "Application quit during observation"
+                    guidance: "The application quit. Restart it and try again."
                 )
             )
         case .maxEventsExceeded(let limit):
@@ -52,7 +53,8 @@ extension ErrorConverter {
                     operation: operation,
                     errorType: "max_events_exceeded",
                     message: "Event limit of \(limit) reached",
-                    app: app
+                    app: app,
+                    guidance: "Use a shorter duration or filter to specific event types to reduce volume."
                 )
             )
         case .observerAlreadyActive(let pid):
@@ -61,7 +63,8 @@ extension ErrorConverter {
                     operation: operation,
                     errorType: "observer_already_active",
                     message: "Observer already active for PID \(pid)",
-                    app: app
+                    app: app,
+                    guidance: "Wait for the current observation to complete before starting another."
                 )
             )
         }

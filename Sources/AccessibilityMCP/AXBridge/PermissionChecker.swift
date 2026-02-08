@@ -11,7 +11,7 @@ struct PermissionChecker: Sendable {
     private func permissionDeniedError(
     ) -> AccessibilityError {
         .permissionDenied(
-            guidance: "Grant Accessibility permissions in System Settings > Privacy & Security > Accessibility"
+            guidance: "Open System Settings > Privacy & Security > Accessibility and enable this application. You may need to restart after granting permission."
         )
     }
 }
