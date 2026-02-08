@@ -4,21 +4,21 @@
             "type": "swift",
             "request": "launch",
             "args": [],
-            "cwd": "${workspaceFolder:macos-accessibility-mcp}",
-            "name": "Debug accessibility-mcp",
-            "target": "accessibility-mcp",
+            "cwd": "${workspaceFolder:axmcp}",
+            "name": "Debug axmcp",
+            "target": "axmcp",
             "configuration": "debug",
-            "preLaunchTask": "swift: Build Debug accessibility-mcp"
+            "preLaunchTask": "swift: Build Debug axmcp"
         },
         {
             "type": "swift",
             "request": "launch",
             "args": [],
-            "cwd": "${workspaceFolder:macos-accessibility-mcp}",
-            "name": "Release accessibility-mcp",
-            "target": "accessibility-mcp",
+            "cwd": "${workspaceFolder:axmcp}",
+            "name": "Release axmcp",
+            "target": "axmcp",
             "configuration": "release",
-            "preLaunchTask": "swift: Build Release accessibility-mcp"
+            "preLaunchTask": "swift: Build Release axmcp"
         }
     ]
 }

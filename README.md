@@ -1,4 +1,4 @@
-# Accessibility MCP Server
+# AxMCP
 
 An MCP server that lets Claude (or any LLM) see and interact with macOS applications through the Accessibility API. It can read UI trees, find elements, click buttons, type text, and watch for changes.
 
@@ -9,8 +9,8 @@ An MCP server that lets Claude (or any LLM) see and interact with macOS applicat
 ### Step 1: Build it
 
 ```bash
-git clone https://github.com/adamrdrew/macos-accessibility-mcp.git
-cd macos-accessibility-mcp
+git clone https://github.com/adamrdrew/axmcp.git
+cd axmcp
 swift build -c release
 ```
 
@@ -28,7 +28,7 @@ If the file doesn't exist, create it. Add this (replace the path with where you 
 {
   "mcpServers": {
     "accessibility": {
-      "command": "/Users/YOURUSERNAME/macos-accessibility-mcp/.build/release/accessibility-mcp"
+      "command": "/Users/YOURUSERNAME/axmcp/.build/release/axmcp"
     }
   }
 }
@@ -77,8 +77,8 @@ You don't need to call these tools directly. Just describe what you want in natu
 ### Homebrew
 
 ```bash
-brew tap adamrdrew/accessibility-mcp
-brew install accessibility-mcp
+brew tap adamrdrew/axmcp
+brew install axmcp
 ```
 
 If you install via Homebrew, your Claude Desktop config is simpler:
@@ -87,7 +87,7 @@ If you install via Homebrew, your Claude Desktop config is simpler:
 {
   "mcpServers": {
     "accessibility": {
-      "command": "accessibility-mcp"
+      "command": "axmcp"
     }
   }
 }
@@ -98,12 +98,12 @@ If you install via Homebrew, your Claude Desktop config is simpler:
 Requires macOS 13.0+ and Swift 6.
 
 ```bash
-git clone https://github.com/adamrdrew/macos-accessibility-mcp.git
-cd macos-accessibility-mcp
+git clone https://github.com/adamrdrew/axmcp.git
+cd axmcp
 swift build -c release
 ```
 
-The binary will be at `.build/release/accessibility-mcp`.
+The binary will be at `.build/release/axmcp`.
 
 ## Safety Features
 
@@ -115,7 +115,7 @@ Write operations (clicking, typing) have safety guards built in:
 {
   "mcpServers": {
     "accessibility": {
-      "command": "accessibility-mcp",
+      "command": "axmcp",
       "args": ["--read-only"]
     }
   }
@@ -130,9 +130,9 @@ Write operations (clicking, typing) have safety guards built in:
 
 | Environment Variable | CLI Flag | Default | Description |
 |---------------------|----------|---------|-------------|
-| `ACCESSIBILITY_MCP_READ_ONLY` | `--read-only` | `false` | Disable write operations |
-| `ACCESSIBILITY_MCP_RATE_LIMIT` | - | `10` | Max write operations per second |
-| `ACCESSIBILITY_MCP_BLOCKLIST` | - | (see above) | Comma-separated bundle IDs to block for writes |
+| `AXMCP_READ_ONLY` | `--read-only` | `false` | Disable write operations |
+| `AXMCP_RATE_LIMIT` | - | `10` | Max write operations per second |
+| `AXMCP_BLOCKLIST` | - | (see above) | Comma-separated bundle IDs to block for writes |
 
 Example with custom config:
 
@@ -140,10 +140,10 @@ Example with custom config:
 {
   "mcpServers": {
     "accessibility": {
-      "command": "accessibility-mcp",
+      "command": "axmcp",
       "env": {
-        "ACCESSIBILITY_MCP_RATE_LIMIT": "5",
-        "ACCESSIBILITY_MCP_BLOCKLIST": "com.example.app1,com.example.app2"
+        "AXMCP_RATE_LIMIT": "5",
+        "AXMCP_BLOCKLIST": "com.example.app1,com.example.app2"
       }
     }
   }
@@ -290,14 +290,14 @@ Write operations are blocked for this app. Read operations still work. See the S
 
 ### "read_only_mode" error
 
-Remove the `--read-only` flag or unset `ACCESSIBILITY_MCP_READ_ONLY`.
+Remove the `--read-only` flag or unset `AXMCP_READ_ONLY`.
 
 ### Claude Desktop can't connect to the server
 
 - Check the binary path in `claude_desktop_config.json` is correct and absolute
-- Make sure the binary has execute permissions: `chmod +x /path/to/accessibility-mcp`
+- Make sure the binary has execute permissions: `chmod +x /path/to/axmcp`
 - Restart Claude Desktop after editing the config
-- Check Console.app for logs under subsystem `com.adamrdrew.accessibility-mcp`
+- Check Console.app for logs under subsystem `com.adamrdrew.axmcp`
 
 ## Limitations
 

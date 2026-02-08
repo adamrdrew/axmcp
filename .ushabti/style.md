@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This style guide defines the conventions, patterns, and architectural expectations for Accessibility MCP development. These guidelines promote consistency, maintainability, and code quality across the codebase. All contributors must follow these conventions unless explicitly justified otherwise.
+This style guide defines the conventions, patterns, and architectural expectations for AxMCP development. These guidelines promote consistency, maintainability, and code quality across the codebase. All contributors must follow these conventions unless explicitly justified otherwise.
 
 Reviewers should verify adherence to this style guide before approving changes. Style violations should be identified and corrected during review.
 
@@ -15,9 +15,9 @@ This style guide governs **how** the system is built. Laws in `.ushabti/laws.md`
 ### Directory Layout
 
 ```
-accessibility-mcp/
+axmcp/
 ├── Sources/
-│   ├── AccessibilityMCP/           # Main server implementation
+│   ├── AxMCP/                      # Main server implementation
 │   │   ├── Server/                 # MCP server infrastructure
 │   │   ├── Tools/                  # MCP tool implementations
 │   │   ├── ElementReference/       # Element path and resolution
@@ -27,9 +27,9 @@ accessibility-mcp/
 │   │   ├── AXBridge/               # C API bridging and type wrappers
 │   │   ├── Security/               # Permissions, blocklists, rate limiting
 │   │   └── Models/                 # Data models and types
-│   └── AccessibilityMCPCore/       # Reusable core components
+│   └── AxMCPCore/                  # Reusable core components
 ├── Tests/
-│   ├── AccessibilityMCPTests/      # Main test suite
+│   ├── AxMCPTests/                 # Main test suite
 │   │   ├── Mocks/                  # Mock AX API implementations
 │   │   └── Fixtures/               # Test fixtures and mock data
 │   └── IntegrationTests/           # Tests using real test applications
@@ -42,8 +42,8 @@ accessibility-mcp/
 
 ### Module Boundaries
 
-- **AccessibilityMCP**: Main executable module, MCP server implementation, tool definitions, element access, tree traversal, action execution
-- **AccessibilityMCPCore**: Reusable abstractions for AX API access, security, utilities (if needed for test isolation or future reuse)
+- **AxMCP**: Main executable module, MCP server implementation, tool definitions, element access, tree traversal, action execution
+- **AxMCPCore**: Reusable abstractions for AX API access, security, utilities (if needed for test isolation or future reuse)
 
 The separation between read and write operations must be architecturally clear. Read tools (tree traversal, element search) go in `TreeTraversal/` and `ElementReference/`. Write tools (actions, value setting) go in `Actions/`. This enables read-only mode enforcement (enforced by L16).
 
@@ -673,10 +673,10 @@ func validateElementPath(_ path: ElementPath) throws(ElementReferenceError) {
 
 ### Test Location
 
-- Unit tests live in `Tests/AccessibilityMCPTests/`
+- Unit tests live in `Tests/AxMCPTests/`
 - Integration tests live in `Tests/IntegrationTests/`
-- Test files mirror source structure: `Sources/AccessibilityMCP/TreeTraversal/TreeNode.swift` → `Tests/AccessibilityMCPTests/TreeTraversal/TreeNodeTests.swift`
-- Mocks and fixtures in `Tests/AccessibilityMCPTests/Mocks/` and `Tests/Fixtures/`
+- Test files mirror source structure: `Sources/AxMCP/TreeTraversal/TreeNode.swift` → `Tests/AxMCPTests/TreeTraversal/TreeNodeTests.swift`
+- Mocks and fixtures in `Tests/AxMCPTests/Mocks/` and `Tests/Fixtures/`
 
 ### Test Principles
 
@@ -708,7 +708,7 @@ func validateElementPath(_ path: ElementPath) throws(ElementReferenceError) {
 
 ```swift
 import Testing
-@testable import AccessibilityMCP
+@testable import AxMCP
 
 @Suite("ElementPath Tests")
 struct ElementPathTests {
@@ -923,7 +923,7 @@ When writing code or reviewing changes, follow these principles:
 
 ## Summary
 
-This style guide establishes conventions for building Accessibility MCP with clarity, consistency, and maintainability. By following Sandi Metz's rules, Swift idioms, domain-specific patterns for element referencing and tree traversal, and the patterns outlined here, we ensure a codebase that is easy to understand, test, and evolve.
+This style guide establishes conventions for building AxMCP with clarity, consistency, and maintainability. By following Sandi Metz's rules, Swift idioms, domain-specific patterns for element referencing and tree traversal, and the patterns outlined here, we ensure a codebase that is easy to understand, test, and evolve.
 
 All style guidance is compatible with the laws defined in `.ushabti/laws.md`. If a conflict arises, laws take precedence.
 

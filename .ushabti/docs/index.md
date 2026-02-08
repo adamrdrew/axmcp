@@ -4,7 +4,7 @@
 
 ## Project Name
 
-Accessibility MCP Server
+AxMCP
 
 ## Description
 

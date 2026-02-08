@@ -2,7 +2,7 @@
 
 ## Preamble
 
-These laws define the non-negotiable invariants for the Accessibility MCP server. Every implementation, refactor, and phase must satisfy these constraints. They are enforced during Overseer review and may not be weakened without explicit user authorization. A phase cannot be marked complete until all applicable laws are verified.
+These laws define the non-negotiable invariants for the AxMCP server. Every implementation, refactor, and phase must satisfy these constraints. They are enforced during Overseer review and may not be weakened without explicit user authorization. A phase cannot be marked complete until all applicable laws are verified.
 
 ## Laws
 

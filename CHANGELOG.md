@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Project renamed from "Accessibility MCP" to "AxMCP"**
+  - Package name: `AccessibilityMCP` → `AxMCP`
+  - Executable name: `accessibility-mcp` → `axmcp`
+  - Module names: `AccessibilityMCP` → `AxMCP`, `AccessibilityMCPTests` → `AxMCPTests`
+  - Logging subsystem: `com.adamrdrew.accessibility-mcp` → `com.adamrdrew.axmcp`
+  - **Breaking change:** Users must update their Claude Desktop config to reference the new binary name `axmcp` instead of `accessibility-mcp`
+
 ## [0.1.0] - 2026-02-07
 
 ### Added
@@ -27,14 +36,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tree traversal engine with depth limiting, role/attribute filtering, and timeout enforcement
 - Element search with multi-criteria matching and result limits
 - **Safety features:**
-  - Read-only mode (`--read-only` flag or `ACCESSIBILITY_MCP_READ_ONLY` env var)
+  - Read-only mode (`--read-only` flag or `AXMCP_READ_ONLY` env var, originally `ACCESSIBILITY_MCP_READ_ONLY` in 0.1.0)
   - Application blocklist with configurable bundle IDs (default: Keychain Access, Terminal, iTerm2, System Settings)
-  - Rate limiting for write operations (default: 10 actions/second, configurable via `ACCESSIBILITY_MCP_RATE_LIMIT`)
+  - Rate limiting for write operations (default: 10 actions/second, configurable via `AXMCP_RATE_LIMIT`, originally `ACCESSIBILITY_MCP_RATE_LIMIT` in 0.1.0)
   - Post-action state verification on all write operations
 - Accessibility permission detection with actionable error guidance
 - Observer subsystem with dedicated RunLoop thread, C callback bridging, and batch event collection
 - Structured JSON error responses with operation context, error types, and actionable guidance
-- Structured logging via os.log with subsystem `com.adamrdrew.accessibility-mcp`
+- Structured logging via os.log with subsystem `com.adamrdrew.axmcp` (originally `com.adamrdrew.accessibility-mcp` in 0.1.0)
 - Actor-based state management for thread safety (ServerContext, ApplicationBlocklist, RateLimiter, ObserverManager)
 - GitHub Actions workflows for CI testing and universal binary releases
 - Homebrew tap formula for distribution

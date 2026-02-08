@@ -2,14 +2,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "AccessibilityMCP",
+    name: "AxMCP",
     platforms: [
         .macOS(.v13)
     ],
     products: [
         .executable(
-            name: "accessibility-mcp",
-            targets: ["AccessibilityMCP"]
+            name: "axmcp",
+            targets: ["AxMCP"]
         )
     ],
     dependencies: [
@@ -20,7 +20,7 @@ let package = Package(
     ],
     targets: [
         .executableTarget(
-            name: "AccessibilityMCP",
+            name: "AxMCP",
             dependencies: [
                 .product(name: "MCP", package: "swift-sdk")
             ],
@@ -29,8 +29,8 @@ let package = Package(
             ]
         ),
         .testTarget(
-            name: "AccessibilityMCPTests",
-            dependencies: ["AccessibilityMCP"]
+            name: "AxMCPTests",
+            dependencies: ["AxMCP"]
         )
     ]
 )

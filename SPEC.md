@@ -1,4 +1,4 @@
-# Accessibility MCP Server — Product Specification
+# AxMCP — Product Specification
 
 ## Document Status
 - **Version:** 1.0
@@ -10,7 +10,7 @@
 
 ## 1. Vision
 
-Accessibility MCP Server is a macOS MCP server written in Swift that exposes the macOS Accessibility (AX) API to LLMs through the Model Context Protocol. It gives LLMs structured, semantic read and write access to any application's UI via the accessibility tree.
+AxMCP is a macOS MCP server written in Swift that exposes the macOS Accessibility (AX) API to LLMs through the Model Context Protocol. It gives LLMs structured, semantic read and write access to any application's UI via the accessibility tree.
 
 Unlike pixel-based screen-scraping agents (Anthropic Computer Use, OpenAI's equivalent), this server operates on a structured hierarchy of UI elements — buttons, text fields, menus, windows — with their types, roles, labels, states, and available actions. Unlike AppleScript, it works with **every** app, not just ones that opted into scripting dictionaries. Apple *requires* apps to support the Accessibility API, so coverage is near-universal across native macOS apps.
 
@@ -20,7 +20,7 @@ This turns an LLM into a universal macOS automation agent that can observe and d
 
 | Approach | Structured? | Universal? | Read+Write? |
 |----------|-------------|------------|-------------|
-| **Accessibility MCP** | ✅ Semantic tree | ✅ All apps | ✅ Full |
+| **AxMCP** | ✅ Semantic tree | ✅ All apps | ✅ Full |
 | AppleScript MCP | ✅ Dictionaries | ❌ Opt-in only | ✅ Full |
 | Computer Use agents | ❌ Pixels | ✅ All apps | ✅ Full |
 | macOS Shortcuts | ✅ Actions | ❌ Predefined only | ✅ Limited |
@@ -348,10 +348,10 @@ Validation, error messages, logging, README, CHANGELOG, Homebrew formula, edge c
 
 ## 9. Synergies
 
-### Spotlight MCP + Accessibility MCP
+### Spotlight MCP + AxMCP
 Find a file via Spotlight → open it → drive the application UI to do something with it. "Find the spreadsheet I was working on last week, open it in Numbers, select cell B2, and enter this value."
 
-### AppleScript MCP + Accessibility MCP
+### AppleScript MCP + AxMCP
 AppleScript for apps that support it (faster, more reliable scripting dictionary) → Accessibility as fallback for everything else. The two are complementary, not competing.
 
 ### Future MCP Servers
