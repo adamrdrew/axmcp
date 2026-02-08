@@ -4,17 +4,20 @@ struct TreeTraverser: Sendable {
     func traverse(
         element: UIElement,
         options: TreeTraversalOptions,
-        bridge: any AXBridge
+        bridge: any AXBridge,
+        applicationPID: pid_t
     ) throws(TreeTraversalError) -> TreeNode {
         try validate(options: options)
         let deadline = Date().addingTimeInterval(options.timeout)
-        return try buildNode(
+        let rootPath = "app(\(applicationPID))"
+        return try buildNodeWithPath(
             element: element,
             depth: 0,
             options: options,
             bridge: bridge,
-            pathComponents: [],
-            deadline: deadline
+            pathString: rootPath,
+            deadline: deadline,
+            applicationPID: applicationPID
         )
     }
 }
@@ -34,7 +37,8 @@ extension TreeTraverser {
         options: TreeTraversalOptions,
         bridge: any AXBridge,
         pathComponents: [String],
-        deadline: Date
+        deadline: Date,
+        applicationPID: pid_t
     ) throws(TreeTraversalError) -> TreeNode {
         try checkTimeout(deadline: deadline, timeout: options.timeout)
         let role = try getRole(element: element, bridge: bridge)
@@ -48,7 +52,8 @@ extension TreeTraverser {
             options: options,
             bridge: bridge,
             pathComponents: pathComponents,
-            deadline: deadline
+            deadline: deadline,
+            applicationPID: applicationPID
         )
     }
 
@@ -89,7 +94,8 @@ extension TreeTraverser {
         options: TreeTraversalOptions,
         bridge: any AXBridge,
         pathComponents: [String],
-        deadline: Date
+        deadline: Date,
+        applicationPID: pid_t
     ) throws(TreeTraversalError) -> TreeNode {
         TreeNode(
             role: role,
@@ -102,10 +108,11 @@ extension TreeTraverser {
                 bridge: bridge,
                 pathComponents: pathComponents,
                 role: role,
-                deadline: deadline
+                deadline: deadline,
+                applicationPID: applicationPID
             ),
             actions: getActions(element: element, bridge: bridge),
-            path: buildPath(components: pathComponents, role: role),
+            path: buildPath(components: pathComponents, role: role, applicationPID: applicationPID),
             childCount: getChildCount(element: element, bridge: bridge),
             depth: depth
         )

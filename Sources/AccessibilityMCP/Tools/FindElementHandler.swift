@@ -18,7 +18,7 @@ struct FindElementHandler: Sendable {
             let pid = try resolvePID(parameters.app)
             let element = try createAppElement(pid: pid)
             let criteria = createCriteria(from: parameters)
-            let results = try findElements(in: element, criteria)
+            let results = try findElements(in: element, criteria, pid)
             return createResponse(results, criteria, parameters)
         } catch let error as AppResolutionError {
             throw ErrorConverter.convertAppError(error, operation: "find_element")
@@ -67,9 +67,10 @@ struct FindElementHandler: Sendable {
 
     private func findElements(
         in element: UIElement,
-        _ criteria: SearchCriteria
+        _ criteria: SearchCriteria,
+        _ pid: pid_t
     ) throws(TreeTraversalError) -> [(UIElement, ElementPath)] {
-        try finder.find(criteria: criteria, in: element, bridge: bridge)
+        try finder.find(criteria: criteria, in: element, bridge: bridge, applicationPID: pid)
     }
 
     private func createResponse(

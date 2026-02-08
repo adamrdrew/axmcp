@@ -16,7 +16,8 @@ struct TreeTraverserTimeoutTests {
         let tree = try traverser.traverse(
             element: element,
             options: options,
-            bridge: mockBridge
+            bridge: mockBridge,
+            applicationPID: 1234
         )
         #expect(tree.role == "AXApplication")
     }
@@ -32,7 +33,8 @@ struct TreeTraverserTimeoutTests {
         let tree = try traverser.traverse(
             element: element,
             options: options,
-            bridge: mockBridge
+            bridge: mockBridge,
+            applicationPID: 1234
         )
         #expect(tree.role == "AXApplication")
     }
@@ -55,7 +57,8 @@ struct TreeTraverserTimeoutTests {
             try traverser.traverse(
                 element: element,
                 options: options,
-                bridge: mockBridge
+                bridge: mockBridge,
+                applicationPID: 1234
             )
         }, throws: { error in
             if case TreeTraversalError.timeoutExceeded = error {

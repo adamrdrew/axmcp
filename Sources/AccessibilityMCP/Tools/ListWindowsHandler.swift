@@ -48,9 +48,7 @@ struct ListWindowsHandler: Sendable {
     private func getAppWindows(_ appName: String) throws -> [WindowInfo] {
         let pid = try resolver.resolve(appIdentifier: appName)
         let appElement = try bridge.createApplicationElement(pid: pid)
-        let windows: [UIElement] = (
-            try? bridge.getAttribute(.windows, from: appElement)
-        ) ?? []
+        let windows = try bridge.getWindows(from: appElement)
         return windows.compactMap { converter.convert($0, appName: appName) }
     }
 

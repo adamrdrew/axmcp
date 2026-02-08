@@ -16,7 +16,8 @@ struct TreeTraverserRoleFilterTests {
         let tree = try traverser.traverse(
             element: element,
             options: options,
-            bridge: bridge
+            bridge: bridge,
+            applicationPID: 1234
         )
         #expect(tree.role == "AXApplication")
     }
@@ -33,7 +34,8 @@ struct TreeTraverserRoleFilterTests {
         let tree = try traverser.traverse(
             element: element,
             options: options,
-            bridge: bridge
+            bridge: bridge,
+            applicationPID: 1234
         )
         #expect(tree.role == "AXApplication")
     }
@@ -47,7 +49,8 @@ struct TreeTraverserRoleFilterTests {
         let tree = try traverser.traverse(
             element: element,
             options: options,
-            bridge: bridge
+            bridge: bridge,
+            applicationPID: 1234
         )
         #expect(tree.role == "AXApplication")
     }

@@ -18,7 +18,7 @@ struct GetUITreeHandler: Sendable {
             let pid = try resolvePID(parameters.app)
             let element = try createAppElement(pid: pid)
             let options = createOptions(from: parameters)
-            let tree = try executeTraversal(element, options)
+            let tree = try executeTraversal(element, options, pid)
             return createResponse(tree: tree, parameters: parameters)
         } catch let error as AppResolutionError {
             throw ErrorConverter.convertAppError(error, operation: "get_ui_tree")
@@ -71,12 +71,14 @@ struct GetUITreeHandler: Sendable {
 
     private func executeTraversal(
         _ element: UIElement,
-        _ options: TreeTraversalOptions
+        _ options: TreeTraversalOptions,
+        _ pid: pid_t
     ) throws(TreeTraversalError) -> TreeNode {
         try traverser.traverse(
             element: element,
             options: options,
-            bridge: bridge
+            bridge: bridge,
+            applicationPID: pid
         )
     }
 

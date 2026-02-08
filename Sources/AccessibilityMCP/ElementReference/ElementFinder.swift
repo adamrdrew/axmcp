@@ -6,13 +6,15 @@ struct ElementFinder: Sendable {
     func find(
         criteria: SearchCriteria,
         in element: UIElement,
-        bridge: any AXBridge
+        bridge: any AXBridge,
+        applicationPID: pid_t
     ) throws(TreeTraversalError) -> [(UIElement, ElementPath)] {
         let options = createTraversalOptions(from: criteria)
         let tree = try traverser.traverse(
             element: element,
             options: options,
-            bridge: bridge
+            bridge: bridge,
+            applicationPID: applicationPID
         )
         return findMatches(in: tree, criteria: criteria, bridge: bridge)
     }

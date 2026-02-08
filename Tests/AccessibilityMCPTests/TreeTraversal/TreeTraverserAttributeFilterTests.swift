@@ -16,7 +16,8 @@ struct TreeTraverserAttributeFilterTests {
         let tree = try traverser.traverse(
             element: element,
             options: options,
-            bridge: bridge
+            bridge: bridge,
+            applicationPID: 1234
         )
         #expect(tree.title != nil)
         #expect(tree.value == nil)
@@ -31,7 +32,8 @@ struct TreeTraverserAttributeFilterTests {
         let tree = try traverser.traverse(
             element: element,
             options: options,
-            bridge: bridge
+            bridge: bridge,
+            applicationPID: 1234
         )
         #expect(tree.title != nil)
         #expect(tree.value != nil)

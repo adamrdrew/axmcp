@@ -35,4 +35,8 @@ protocol AXBridge: Sendable {
     func getChildren(
         from element: UIElement
     ) throws(AccessibilityError) -> [UIElement]
+
+    func getWindows(
+        from element: UIElement
+    ) throws(AccessibilityError) -> [UIElement]
 }

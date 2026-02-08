@@ -48,20 +48,21 @@ extension ElementResolver {
         from element: UIElement,
         bridge: any AXBridge
     ) throws(ElementPathError) -> UIElement {
-        let windows: [UIElement]
         do {
-            windows = try bridge.getAttribute(.windows, from: element)
+            let windows = try bridge.getWindows(from: element)
+            guard index < windows.count else {
+                let titles = windows.compactMap { try? getTitleString($0, bridge: bridge) }
+                throw ElementPathError.componentNotFound(
+                    .windowByIndex(index),
+                    available: titles
+                )
+            }
+            return windows[index]
+        } catch let error as ElementPathError {
+            throw error
         } catch {
-            throw ElementPathError.accessibilityError(error)
+            throw ElementPathError.accessibilityError(error as! AccessibilityError)
         }
-        guard index < windows.count else {
-            let titles = windows.compactMap { try? getTitleString($0, bridge: bridge) }
-            throw ElementPathError.componentNotFound(
-                .windowByIndex(index),
-                available: titles
-            )
-        }
-        return windows[index]
     }
 
     func resolveWindowByTitle(
@@ -69,20 +70,21 @@ extension ElementResolver {
         from element: UIElement,
         bridge: any AXBridge
     ) throws(ElementPathError) -> UIElement {
-        let windows: [UIElement]
         do {
-            windows = try bridge.getAttribute(.windows, from: element)
-        } catch {
-            throw ElementPathError.accessibilityError(error)
-        }
-        for window in windows {
-            if let windowTitle: String = try? bridge.getAttribute(.title, from: window),
-               windowTitle == title {
-                return window
+            let windows = try bridge.getWindows(from: element)
+            for window in windows {
+                if let windowTitle: String = try? bridge.getAttribute(.title, from: window),
+                   windowTitle == title {
+                    return window
+                }
             }
+            let titles = windows.compactMap { try? getTitleString($0, bridge: bridge) }
+            throw ElementPathError.componentNotFound(.windowByTitle(title), available: titles)
+        } catch let error as ElementPathError {
+            throw error
+        } catch {
+            throw ElementPathError.accessibilityError(error as! AccessibilityError)
         }
-        let titles = windows.compactMap { try? getTitleString($0, bridge: bridge) }
-        throw ElementPathError.componentNotFound(.windowByTitle(title), available: titles)
     }
 
     func getTitleString(

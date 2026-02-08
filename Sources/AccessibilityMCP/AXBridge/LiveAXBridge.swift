@@ -55,4 +55,10 @@ struct LiveAXBridge: AXBridge {
     ) throws(AccessibilityError) -> [UIElement] {
         try copyChildren(from: element.rawElement)
     }
+
+    func getWindows(
+        from element: UIElement
+    ) throws(AccessibilityError) -> [UIElement] {
+        try copyWindows(from: element.rawElement)
+    }
 }

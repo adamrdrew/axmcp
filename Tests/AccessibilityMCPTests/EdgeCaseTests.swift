@@ -15,7 +15,8 @@ struct EdgeCaseTests {
         let tree = try traverser.traverse(
             element: element,
             options: options,
-            bridge: bridge
+            bridge: bridge,
+            applicationPID: 1234
         )
         #expect(tree.children.isEmpty)
         #expect(tree.childCount == 0)
@@ -32,7 +33,8 @@ struct EdgeCaseTests {
         let results = try finder.find(
             criteria: criteria,
             in: element,
-            bridge: bridge
+            bridge: bridge,
+            applicationPID: 1234
         )
         #expect(results.isEmpty)
     }
@@ -54,7 +56,8 @@ struct EdgeCaseTests {
         let tree = try traverser.traverse(
             element: element,
             options: options,
-            bridge: bridge
+            bridge: bridge,
+            applicationPID: 1234
         )
         #expect(tree.title == nil)
         #expect(tree.value == nil)

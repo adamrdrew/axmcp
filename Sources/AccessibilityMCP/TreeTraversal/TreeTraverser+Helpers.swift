@@ -60,7 +60,8 @@ extension TreeTraverser {
         bridge: any AXBridge,
         pathComponents: [String],
         role: String,
-        deadline: Date
+        deadline: Date,
+        applicationPID: pid_t
     ) throws(TreeTraversalError) -> [TreeNode] {
         guard depth + 1 < options.maxDepth else { return [] }
         guard let children = try? bridge.getChildren(from: element) else {
@@ -73,7 +74,8 @@ extension TreeTraverser {
             bridge: bridge,
             pathComponents: pathComponents,
             role: role,
-            deadline: deadline
+            deadline: deadline,
+            applicationPID: applicationPID
         )
     }
 }

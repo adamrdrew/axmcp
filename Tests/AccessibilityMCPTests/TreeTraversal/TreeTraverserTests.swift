@@ -14,7 +14,8 @@ struct TreeTraverserTests {
         let tree = try traverser.traverse(
             element: element,
             options: options,
-            bridge: bridge
+            bridge: bridge,
+            applicationPID: 1234
         )
         #expect(tree.depth == 0)
         #expect(maxDepth(of: tree) <= 3)
@@ -29,7 +30,8 @@ struct TreeTraverserTests {
         let tree = try traverser.traverse(
             element: element,
             options: options,
-            bridge: bridge
+            bridge: bridge,
+            applicationPID: 1234
         )
         #expect(tree.children.isEmpty)
         #expect(tree.childCount > 0)
@@ -46,7 +48,8 @@ struct TreeTraverserTests {
         let tree = try traverser.traverse(
             element: element,
             options: options,
-            bridge: bridge
+            bridge: bridge,
+            applicationPID: 1234
         )
         #expect(tree.depth == 0)
         #expect(tree.children.isEmpty)
@@ -61,7 +64,8 @@ struct TreeTraverserTests {
         let tree = try traverser.traverse(
             element: element,
             options: options,
-            bridge: bridge
+            bridge: bridge,
+            applicationPID: 1234
         )
         #expect(tree.children.isEmpty)
         #expect(tree.childCount == 2)

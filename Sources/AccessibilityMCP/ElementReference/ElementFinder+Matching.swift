@@ -45,11 +45,13 @@ extension ElementFinder {
         from node: TreeNode,
         bridge: any AXBridge
     ) -> UIElement? {
-        guard let path = try? ElementPath(parsing: node.path) else {
+        do {
+            let path = try ElementPath(parsing: node.path)
+            let resolver = ElementResolver()
+            return try resolver.resolve(path: path, bridge: bridge)
+        } catch {
             return nil
         }
-        let resolver = ElementResolver()
-        return try? resolver.resolve(path: path, bridge: bridge)
     }
 
     func pathFromString(_ string: String) -> ElementPath {

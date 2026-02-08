@@ -93,6 +93,18 @@ struct MockAXBridge: AXBridge, @unchecked Sendable {
         return mockChildren
     }
 
+    func getWindows(
+        from element: UIElement
+    ) throws(AccessibilityError) -> [UIElement] {
+        simulateDelay()
+        try checkPermissions()
+        try checkElement()
+        guard let windows: [UIElement] = mockAttributes[.windows] as? [UIElement] else {
+            return []
+        }
+        return windows
+    }
+
     private func checkPermissions(
     ) throws(AccessibilityError) {
         guard !shouldThrowPermissionDenied else {

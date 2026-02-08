@@ -13,7 +13,8 @@ struct ElementFinderTitleTests {
         let results = try finder.find(
             criteria: criteria,
             in: element,
-            bridge: bridge
+            bridge: bridge,
+            applicationPID: 1234
         )
         #expect(results.count >= 0)
     }
@@ -27,7 +28,8 @@ struct ElementFinderTitleTests {
         let results = try finder.find(
             criteria: criteria,
             in: element,
-            bridge: bridge
+            bridge: bridge,
+            applicationPID: 1234
         )
         #expect(results.count >= 0)
     }
@@ -44,7 +46,8 @@ struct ElementFinderTitleTests {
         let results = try finder.find(
             criteria: criteria,
             in: element,
-            bridge: bridge
+            bridge: bridge,
+            applicationPID: 1234
         )
         #expect(results.count >= 0)
     }
