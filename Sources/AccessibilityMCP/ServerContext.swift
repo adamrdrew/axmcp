@@ -4,6 +4,7 @@ actor ServerContext {
     let configuration: ServerConfiguration
     let blocklist: ApplicationBlocklist
     let rateLimiter: RateLimiter
+    let observerManager: ObserverManager
 
     init(configuration: ServerConfiguration) {
         self.configuration = configuration
@@ -12,6 +13,9 @@ actor ServerContext {
         )
         self.rateLimiter = RateLimiter(
             maxActionsPerSecond: configuration.rateLimitPerSecond
+        )
+        self.observerManager = ObserverManager(
+            bridge: LiveObserverBridge()
         )
     }
 
@@ -25,5 +29,9 @@ actor ServerContext {
 
     func getRateLimiter() -> RateLimiter {
         rateLimiter
+    }
+
+    func getObserverManager() -> ObserverManager {
+        observerManager
     }
 }

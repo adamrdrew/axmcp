@@ -1,0 +1,125 @@
+phase:
+  id: "0006"
+  slug: observation
+  title: Observation
+  status: complete
+
+steps:
+  - id: S001
+    title: Observer Event Types and Data Models
+    implemented: true
+    reviewed: true
+    notes: "Created ObserverEventType, ObserverEvent, ObserverError. All 9 tests pass."
+    touched:
+      - Sources/AccessibilityMCP/Observers/ObserverEventType.swift
+      - Sources/AccessibilityMCP/Observers/ObserverEvent.swift
+      - Sources/AccessibilityMCP/Observers/ObserverError.swift
+      - Tests/AccessibilityMCPTests/Observers/ObserverEventTypeTests.swift
+      - Tests/AccessibilityMCPTests/Observers/ObserverEventTests.swift
+
+  - id: S002
+    title: ObserveChanges Parameters and Response Structs
+    implemented: true
+    reviewed: true
+    notes: "Created ObserveChangesParameters with validation/clamping and ObserveChangesResponse. All 10 tests pass."
+    touched:
+      - Sources/AccessibilityMCP/Observers/ObserveChangesParameters.swift
+      - Sources/AccessibilityMCP/Observers/ObserveChangesResponse.swift
+      - Tests/AccessibilityMCPTests/Observers/ObserveChangesParametersTests.swift
+      - Tests/AccessibilityMCPTests/Observers/ObserveChangesResponseTests.swift
+
+  - id: S003
+    title: AXBridge Observer Protocol Extension
+    implemented: true
+    reviewed: true
+    notes: "Created ObserverBridge protocol (separate from AXBridge for clean separation), LiveObserverBridge with real AXObserver, ObserverContext for lifecycle, RunLoopThread for dedicated RunLoop, MockObserverBridge for tests. All 5 tests pass."
+    touched:
+      - Sources/AccessibilityMCP/Observers/ObserverBridge.swift
+      - Sources/AccessibilityMCP/Observers/LiveObserverBridge.swift
+      - Sources/AccessibilityMCP/Observers/ObserverContext.swift
+      - Sources/AccessibilityMCP/Observers/RunLoopThread.swift
+      - Tests/AccessibilityMCPTests/Mocks/MockObserverBridge.swift
+      - Tests/AccessibilityMCPTests/Observers/ObserverBridgeTests.swift
+
+  - id: S004
+    title: ObserverManager Actor — Core Lifecycle
+    implemented: true
+    reviewed: true
+    notes: "Created ObserverManager actor with start/stop/stopAll lifecycle management. All 5 tests pass."
+    touched:
+      - Sources/AccessibilityMCP/Observers/ObserverManager.swift
+      - Tests/AccessibilityMCPTests/Observers/ObserverManagerTests.swift
+
+  - id: S005
+    title: RunLoop Thread Management
+    implemented: true
+    reviewed: true
+    notes: "RunLoopThread (dedicated CFRunLoop thread) and C callback bridging (observerCallback + CallbackBox) were implemented as part of S003. ObserverContext manages the full lifecycle. Verified via mock bridge tests."
+    touched:
+      - Sources/AccessibilityMCP/Observers/RunLoopThread.swift
+      - Sources/AccessibilityMCP/Observers/ObserverContext.swift
+
+  - id: S006
+    title: Duration Enforcement and Event Collection
+    implemented: true
+    reviewed: true
+    notes: "Created EventCollector with duration enforcement and max event truncation. EventCollectionResult struct. All 5 tests pass."
+    touched:
+      - Sources/AccessibilityMCP/Observers/EventCollector.swift
+      - Sources/AccessibilityMCP/Observers/EventCollectionResult.swift
+      - Tests/AccessibilityMCPTests/Observers/EventCollectorTests.swift
+
+  - id: S007
+    title: ObserveChangesHandler
+    implemented: true
+    reviewed: true
+    notes: "Created ObserveChangesHandler with full flow: validate params, resolve app/element, start observation stream, collect events with duration enforcement, build response. Error conversion extension. All 6 tests pass."
+    touched:
+      - Sources/AccessibilityMCP/Tools/ObserveChangesHandler.swift
+      - Sources/AccessibilityMCP/Tools/ObserveChangesHandler+Errors.swift
+      - Tests/AccessibilityMCPTests/Observers/ObserveChangesHandlerTests.swift
+
+  - id: S008
+    title: Wire observe_changes to MCP Server
+    implemented: true
+    reviewed: true
+    notes: "Registered observe_changes in tool list (always visible), added dispatch routing, added ObserverManager to ServerContext. Updated server tests. All 6 tests pass."
+    touched:
+      - Sources/AccessibilityMCP/AccessibilityServer+ObserveTools.swift
+      - Sources/AccessibilityMCP/AccessibilityServer.swift
+      - Sources/AccessibilityMCP/ServerContext.swift
+      - Tests/AccessibilityMCPTests/ServerTests.swift
+
+  - id: S009
+    title: ErrorConverter Updates for Observer Operations
+    implemented: true
+    reviewed: true
+    notes: "ErrorConverter+ObserverOperations.swift handles all ObserverError cases. All 6 tests pass."
+    touched:
+      - Sources/AccessibilityMCP/Tools/ErrorConverter+ObserverOperations.swift
+      - Tests/AccessibilityMCPTests/ErrorConverterObserverTests.swift
+
+  - id: S010
+    title: Observer Integration Tests
+    implemented: true
+    reviewed: true
+    notes: "Created integration tests covering full observation flow, cleanup verification, JSON structure, ISO 8601 timestamps, error handling, and default event subscription. All 6 tests pass."
+    touched:
+      - Tests/AccessibilityMCPTests/Observers/ObserverIntegrationTests.swift
+
+  - id: S011
+    title: Update README with Observer Documentation
+    implemented: true
+    reviewed: true
+    notes: "Updated README with observe_changes documentation: parameters, return value, examples, limitations. Updated tool count, added error types, removed stale limitation note."
+    touched:
+      - README.md
+
+  - id: S012
+    title: Refactor ObserverContext for Sandi Metz Compliance
+    implemented: true
+    reviewed: true
+    notes: "Created ObserverCallback.swift with CallbackBox, observerCallback, and helper functions. Refactored ObserverContext.swift to use helper methods. ObserverContext.swift: 95 lines (under 100), all methods ≤5 lines. ObserverCallback.swift: 69 lines (under 100), all methods ≤5 lines. All 227 tests pass, zero build warnings."
+    touched:
+      - Sources/AccessibilityMCP/Observers/ObserverCallback.swift
+      - Sources/AccessibilityMCP/Observers/ObserverContext.swift

@@ -30,6 +30,7 @@ struct AccessibilityServer {
 
     static func tools(config: ServerConfiguration) -> [Tool] {
         var toolList = readTools()
+        toolList.append(contentsOf: observeTools())
         if !config.readOnlyMode {
             toolList.append(contentsOf: writeTools())
         }
@@ -154,6 +155,12 @@ struct AccessibilityServer {
             if params.name == "perform_action" || params.name == "set_value" {
                 return try await handleWriteTool(
                     name: params.name,
+                    data: data,
+                    context: context
+                )
+            }
+            if params.name == "observe_changes" {
+                return try await handleObserveTool(
                     data: data,
                     context: context
                 )

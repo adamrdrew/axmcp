@@ -4,7 +4,7 @@ A macOS MCP server written in Swift that exposes the macOS Accessibility (AX) AP
 
 ## Status
 
-This project is in active development. The current version (0.1.0) provides both read and write access to macOS Accessibility trees with six MCP tools: four for UI inspection and two for UI automation. Write operations are protected by read-only mode, application blocklist, and rate limiting.
+This project is in active development. The current version (0.1.0) provides read, write, and observe access to macOS Accessibility trees with seven MCP tools: four for UI inspection, two for UI automation, and one for monitoring UI changes. Write operations are protected by read-only mode, application blocklist, and rate limiting.
 
 ## Requirements
 
@@ -70,7 +70,7 @@ Without these permissions, the server will return permission denied errors.
 
 ## MCP Tools
 
-The server provides six MCP tools: four read-only tools for inspecting application UI and two write tools for UI automation.
+The server provides seven MCP tools: four read-only tools for inspecting application UI, one observation tool for monitoring UI changes, and two write tools for UI automation.
 
 ### Read-Only Tools
 
@@ -185,6 +185,88 @@ List all windows for an application or system-wide.
   "include_minimized": true
 }
 ```
+
+### Observation Tools
+
+Observation tools are available in both normal and read-only modes since they are passive listeners that do not modify UI state.
+
+### observe_changes
+
+Watch for UI change events in an application for a specified duration. Events are collected and returned as a batch when the observation period ends.
+
+**Parameters:**
+- `app` (required): Application name or PID
+- `events` (optional): Array of event types to watch. If omitted, all event types are monitored. Valid types:
+  - `value_changed` - Element value changed (text fields, sliders, etc.)
+  - `focus_changed` - Focus moved to a different element
+  - `window_created` - A new window was created
+  - `window_destroyed` - A window was closed
+  - `title_changed` - An element's title changed
+- `element_path` (optional): Path to a specific element to observe. If omitted, observes the entire application.
+- `duration` (optional): Observation duration in seconds (default: 30, max: 300). Values beyond max are silently clamped.
+
+**Returns:** JSON object with:
+- `events`: Array of collected events, each containing:
+  - `timestamp`: ISO 8601 timestamp of the event
+  - `eventType`: Type of change detected
+  - `elementRole`: Role of the affected element (if available)
+  - `elementTitle`: Title of the affected element (if available)
+  - `elementPath`: Path to the affected element (if determinable)
+  - `newValue`: New value after the change (if applicable)
+- `totalEventsCollected`: Total number of events seen
+- `eventsReturned`: Number of events in the response
+- `truncated`: Whether events were truncated at the 1000-event limit
+- `durationRequested`: The observation duration used
+- `durationActual`: Actual elapsed time
+- `applicationTerminated`: Whether the app quit during observation
+- `notes`: Array of informational messages (clamping, truncation, etc.)
+
+**Example:**
+```json
+{
+  "app": "TextEdit",
+  "events": ["value_changed", "title_changed"],
+  "duration": 10
+}
+```
+
+**Response:**
+```json
+{
+  "events": [
+    {
+      "timestamp": "2026-02-07T18:30:00Z",
+      "eventType": "value_changed",
+      "elementRole": "AXTextArea",
+      "elementTitle": null,
+      "elementPath": null,
+      "newValue": null
+    },
+    {
+      "timestamp": "2026-02-07T18:30:01Z",
+      "eventType": "title_changed",
+      "elementRole": "AXWindow",
+      "elementTitle": "Untitled",
+      "elementPath": null,
+      "newValue": null
+    }
+  ],
+  "totalEventsCollected": 2,
+  "eventsReturned": 2,
+  "truncated": false,
+  "durationRequested": 10,
+  "durationActual": 10.003,
+  "applicationTerminated": false,
+  "notes": []
+}
+```
+
+**Limitations:**
+- Events are batched and returned at the end of the duration (not streamed in real-time)
+- Maximum 1000 events per observation (excess events are dropped with a truncation note)
+- Maximum duration is 300 seconds (5 minutes)
+- The MCP tool call blocks for the entire duration
+- If the observed application terminates, events collected so far are returned with `applicationTerminated: true`
 
 ### Write Tools
 
@@ -405,11 +487,13 @@ All tools return structured errors with:
 - **blocklisted_application**: Write operation attempted on blocklisted app. Read operations are still permitted.
 - **action_not_supported**: The requested action is not supported by the target element. Use `get_ui_tree` or `find_element` to check available actions.
 - **element_path_error**: Element path is invalid or element not found. Check path syntax and ensure element exists.
+- **observer_creation_failed**: Failed to create accessibility observer. Ensure permissions are granted.
+- **application_terminated**: Observed application terminated during observation. Partial results may be returned.
 
 ## Limitations
 
 Current limitations (to be addressed in future phases):
-- No element observation or change notifications
+- Observation uses a batch model (events returned at end of duration, not streamed in real-time)
 - Window position/size/minimized/frontmost detection is placeholder (returns default values)
 - No interactive confirmation dialogs (MCP protocol limitation)
 - Write operations cannot be undone - use with caution
