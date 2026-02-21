@@ -1,1 +1,22 @@
-.build
+# Swift build
+.build/
+.swiftpm/
+
+# Xcode
+DerivedData/
+xcuserdata/
+*.xcworkspace/xcuserdata/
+
+# macOS
+.DS_Store
+
+# Pharaoh job runner state
+.pharaoh/
+
+# IDE
+.vscode/
+.idea/
+
+# Editor temp files
+*.swp
+*~
