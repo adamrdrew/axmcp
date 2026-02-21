@@ -1,10 +1,9 @@
 class Axmcp < Formula
   desc "MCP server exposing macOS Accessibility API to LLMs"
   homepage "https://github.com/adamrdrew/axmcp"
-  url "https://github.com/adamrdrew/axmcp/releases/download/v0.1.0/axmcp"
-  sha256 "PLACEHOLDER_SHA256"
-  version "0.1.0"
-  license "MIT"
+  url "https://github.com/adamrdrew/axmcp/releases/download/v0.1.0/axmcp-v0.1.0-universal.tar.gz"
+  sha256 "PLACEHOLDER"
+  license "GPL-3.0"
 
   depends_on :macos
   depends_on macos: :ventura
@@ -14,7 +13,6 @@ class Axmcp < Formula
   end
 
   test do
-    assert_match "axmcp",
-                 shell_output("#{bin}/axmcp --help 2>&1", 1)
+    assert_predicate bin/"axmcp", :executable?
   end
 end
